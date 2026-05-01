@@ -16,11 +16,7 @@ type FormErrors = Partial<Record<keyof FormData, string>>;
 export default function FormPage() {
   const router = useRouter();
   const [form, setForm] = useState<FormData>({
-    first_name: '',
-    last_name: '',
-    email: '',
-    phone: '',
-    attending: '',
+    first_name: '', last_name: '', email: '', phone: '', attending: '',
   });
   const [errors, setErrors] = useState<FormErrors>({});
 
@@ -38,7 +34,6 @@ export default function FormPage() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
-
     sessionStorage.setItem('rsvp_form', JSON.stringify({
       first_name: form.first_name.trim(),
       last_name: form.last_name.trim(),
@@ -46,7 +41,6 @@ export default function FormPage() {
       phone: form.phone.trim(),
       attending: form.attending === 'yes',
     }));
-
     router.push('/preview');
   }
 
@@ -58,67 +52,71 @@ export default function FormPage() {
     },
   });
 
-  const inputClass = (key: keyof FormErrors) =>
-    `w-full border rounded-lg px-4 py-3 text-stone-800 placeholder-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600 transition text-sm ${
-      errors[key] ? 'border-red-400' : 'border-stone-200'
-    }`;
+  const inputCls = (key: keyof FormErrors) =>
+    `w-full rounded-lg px-4 py-3 text-sm outline-none transition border ${errors[key] ? 'border-red-400' : ''}`;
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-4 py-16">
+    <main className="min-h-screen flex flex-col items-center justify-center px-4 py-16" style={{ background: '#FDFAF5' }}>
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
-          <p className="text-xs tracking-[0.3em] uppercase text-amber-700 mb-3">Your Details</p>
-          <h1 className="font-serif text-3xl md:text-4xl text-stone-800">RSVP Form</h1>
+          <p className="text-xs tracking-[0.35em] uppercase mb-3" style={{ color: '#B8860B' }}>Your Details</p>
+          <h1 className="font-serif text-3xl md:text-4xl" style={{ color: '#2C2C2C' }}>RSVP Form</h1>
           <div className="flex items-center justify-center gap-3 mt-4">
-            <div className="h-px w-12 bg-amber-700/40" />
-            <div className="w-1.5 h-1.5 rounded-full bg-amber-700/60" />
-            <div className="h-px w-12 bg-amber-700/40" />
+            <div className="h-px w-12" style={{ background: '#B8860B', opacity: 0.35 }} />
+            <span style={{ color: '#B8860B' }}>✦</span>
+            <div className="h-px w-12" style={{ background: '#B8860B', opacity: 0.35 }} />
           </div>
         </div>
 
-        <div className="bg-white border border-stone-200 rounded-2xl shadow-sm px-8 py-10">
+        <div className="rounded-2xl shadow-sm px-8 py-10 border" style={{ background: '#fff', borderColor: '#e8dfc8' }}>
           <form onSubmit={handleSubmit} className="space-y-5" noValidate>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs tracking-widest uppercase text-stone-400 mb-2">First Name</label>
-                <input type="text" placeholder="Jane" className={inputClass('first_name')} {...field('first_name')} />
-                {errors.first_name && <p className="mt-1 text-red-500 text-xs">{errors.first_name}</p>}
-              </div>
-              <div>
-                <label className="block text-xs tracking-widest uppercase text-stone-400 mb-2">Last Name</label>
-                <input type="text" placeholder="Smith" className={inputClass('last_name')} {...field('last_name')} />
-                {errors.last_name && <p className="mt-1 text-red-500 text-xs">{errors.last_name}</p>}
-              </div>
+              {(['first_name', 'last_name'] as const).map((key, i) => (
+                <div key={key}>
+                  <label className="block text-xs tracking-widest uppercase mb-2" style={{ color: '#B8860B' }}>
+                    {i === 0 ? 'First Name' : 'Last Name'}
+                  </label>
+                  <input
+                    type="text"
+                    placeholder={i === 0 ? 'Jane' : 'Smith'}
+                    className={inputCls(key)}
+                    style={{ borderColor: errors[key] ? undefined : '#d6cbb0', color: '#2C2C2C' }}
+                    {...field(key)}
+                  />
+                  {errors[key] && <p className="mt-1 text-xs text-red-500">{errors[key]}</p>}
+                </div>
+              ))}
             </div>
 
             <div>
-              <label className="block text-xs tracking-widest uppercase text-stone-400 mb-2">Email</label>
-              <input type="email" placeholder="jane@example.com" className={inputClass('email')} {...field('email')} />
-              {errors.email && <p className="mt-1 text-red-500 text-xs">{errors.email}</p>}
+              <label className="block text-xs tracking-widest uppercase mb-2" style={{ color: '#B8860B' }}>Email</label>
+              <input type="email" placeholder="jane@example.com" className={inputCls('email')}
+                style={{ borderColor: errors.email ? undefined : '#d6cbb0', color: '#2C2C2C' }} {...field('email')} />
+              {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
             </div>
 
             <div>
-              <label className="block text-xs tracking-widest uppercase text-stone-400 mb-2">Phone</label>
-              <input type="tel" placeholder="+1 555 000 0000" className={inputClass('phone')} {...field('phone')} />
-              {errors.phone && <p className="mt-1 text-red-500 text-xs">{errors.phone}</p>}
+              <label className="block text-xs tracking-widest uppercase mb-2" style={{ color: '#B8860B' }}>Phone</label>
+              <input type="tel" placeholder="+1 555 000 0000" className={inputCls('phone')}
+                style={{ borderColor: errors.phone ? undefined : '#d6cbb0', color: '#2C2C2C' }} {...field('phone')} />
+              {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone}</p>}
             </div>
 
             <div>
-              <label className="block text-xs tracking-widest uppercase text-stone-400 mb-3">Will you attend?</label>
+              <label className="block text-xs tracking-widest uppercase mb-3" style={{ color: '#B8860B' }}>Will you attend?</label>
               <div className="grid grid-cols-2 gap-3">
                 {(['yes', 'no'] as const).map((opt) => (
                   <label
                     key={opt}
-                    className={`flex items-center justify-center gap-2 border rounded-lg py-3 cursor-pointer transition text-sm select-none ${
-                      form.attending === opt
-                        ? 'bg-stone-800 text-white border-stone-800'
-                        : 'border-stone-200 text-stone-600 hover:border-stone-400'
-                    }`}
+                    className="flex items-center justify-center gap-2 border rounded-lg py-3 cursor-pointer transition text-sm select-none"
+                    style={{
+                      background: form.attending === opt ? '#1B5E20' : 'transparent',
+                      color: form.attending === opt ? '#fff' : '#2C2C2C',
+                      borderColor: form.attending === opt ? '#1B5E20' : '#d6cbb0',
+                    }}
                   >
                     <input
-                      type="radio"
-                      name="attending"
-                      value={opt}
+                      type="radio" name="attending" value={opt}
                       checked={form.attending === opt}
                       onChange={() => { setForm(f => ({ ...f, attending: opt })); setErrors(e => ({ ...e, attending: undefined })); }}
                       className="sr-only"
@@ -127,19 +125,23 @@ export default function FormPage() {
                   </label>
                 ))}
               </div>
-              {errors.attending && <p className="mt-1 text-red-500 text-xs">{errors.attending}</p>}
+              {errors.attending && <p className="mt-1 text-xs text-red-500">{errors.attending}</p>}
             </div>
 
             <button
               type="submit"
-              className="w-full bg-stone-800 hover:bg-stone-700 text-white rounded-lg py-3 text-sm tracking-widest uppercase transition mt-2"
+              className="w-full rounded-lg py-3 text-sm tracking-widest uppercase text-white transition mt-2"
+              style={{ background: '#B8860B' }}
+              onMouseEnter={e => (e.currentTarget.style.background = '#9a700a')}
+              onMouseLeave={e => (e.currentTarget.style.background = '#B8860B')}
             >
               Preview RSVP
             </button>
           </form>
         </div>
 
-        <button onClick={() => router.push('/')} className="mt-4 w-full text-center text-xs text-stone-400 hover:text-stone-600 transition">
+        <button onClick={() => router.push('/')} className="mt-4 w-full text-center text-xs transition"
+          style={{ color: '#2C2C2C', opacity: 0.4 }}>
           ← Back
         </button>
       </div>

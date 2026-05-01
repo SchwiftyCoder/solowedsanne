@@ -11,6 +11,45 @@ type FormData = {
   attending: boolean;
 };
 
+function Divider({ star = false }: { star?: boolean }) {
+  return (
+    <div className="flex items-center gap-3 my-5">
+      <div className="h-px flex-1" style={{ background: '#B8860B', opacity: 0.25 }} />
+      {star
+        ? <span style={{ color: '#B8860B', fontSize: 14 }}>✦</span>
+        : <div className="w-1 h-1 rounded-full" style={{ background: '#B8860B', opacity: 0.4 }} />}
+      <div className="h-px flex-1" style={{ background: '#B8860B', opacity: 0.25 }} />
+    </div>
+  );
+}
+
+function BotanicalLeaf({ flip = false }: { flip?: boolean }) {
+  return (
+    <svg
+      width="64" height="72" viewBox="0 0 64 72" fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ transform: flip ? 'scaleX(-1)' : undefined }}
+    >
+      {/* Main center stem */}
+      <line x1="32" y1="68" x2="32" y2="12" stroke="#B8860B" strokeWidth="1.1" strokeOpacity="0.55"/>
+      {/* Primary leaf */}
+      <path d="M32 12 C16 20 10 44 32 66 C54 44 48 20 32 12 Z"
+        fill="#B8860B" fillOpacity="0.07" stroke="#B8860B" strokeWidth="1" strokeOpacity="0.5"/>
+      {/* Leaf veins */}
+      <path d="M32 28 Q22 32 19 42" stroke="#B8860B" strokeWidth="0.75" strokeOpacity="0.45"/>
+      <path d="M32 28 Q42 32 45 42" stroke="#B8860B" strokeWidth="0.75" strokeOpacity="0.45"/>
+      <path d="M32 44 Q24 47 22 55" stroke="#B8860B" strokeWidth="0.75" strokeOpacity="0.3"/>
+      <path d="M32 44 Q40 47 42 55" stroke="#B8860B" strokeWidth="0.75" strokeOpacity="0.3"/>
+      {/* Left side sprig */}
+      <path d="M32 22 C24 16 14 22 18 32 C24 24 32 22 32 22 Z"
+        fill="#B8860B" fillOpacity="0.07" stroke="#B8860B" strokeWidth="0.85" strokeOpacity="0.45"/>
+      {/* Right side sprig */}
+      <path d="M32 22 C40 16 50 22 46 32 C40 24 32 22 32 22 Z"
+        fill="#B8860B" fillOpacity="0.07" stroke="#B8860B" strokeWidth="0.85" strokeOpacity="0.45"/>
+    </svg>
+  );
+}
+
 export default function PreviewPage() {
   const router = useRouter();
   const [data, setData] = useState<FormData | null>(null);
@@ -19,22 +58,14 @@ export default function PreviewPage() {
 
   useEffect(() => {
     const raw = sessionStorage.getItem('rsvp_form');
-    if (!raw) {
-      router.replace('/form');
-      return;
-    }
-    try {
-      setData(JSON.parse(raw));
-    } catch {
-      router.replace('/form');
-    }
+    if (!raw) { router.replace('/form'); return; }
+    try { setData(JSON.parse(raw)); } catch { router.replace('/form'); }
   }, [router]);
 
   async function handleConfirm() {
     if (!data) return;
     setSubmitting(true);
     setError('');
-
     try {
       const res = await fetch('/api/rsvp/create', {
         method: 'POST',
@@ -42,13 +73,7 @@ export default function PreviewPage() {
         body: JSON.stringify(data),
       });
       const json = await res.json();
-
-      if (!res.ok) {
-        setError(json.error || 'Something went wrong. Please try again.');
-        setSubmitting(false);
-        return;
-      }
-
+      if (!res.ok) { setError(json.error || 'Something went wrong.'); setSubmitting(false); return; }
       sessionStorage.removeItem('rsvp_form');
       router.push(`/rsvp/${json.token}`);
     } catch {
@@ -62,87 +87,121 @@ export default function PreviewPage() {
   const fullName = `${data.first_name} ${data.last_name}`;
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-4 py-16">
+    <main className="min-h-screen flex flex-col items-center justify-center px-4 py-12" style={{ background: '#FDFAF5' }}>
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <p className="text-xs tracking-[0.3em] uppercase text-amber-700 mb-3">Review Your RSVP</p>
-          <h1 className="font-serif text-3xl md:text-4xl text-stone-800">Confirmation</h1>
-          <div className="flex items-center justify-center gap-3 mt-4">
-            <div className="h-px w-12 bg-amber-700/40" />
-            <div className="w-1.5 h-1.5 rounded-full bg-amber-700/60" />
-            <div className="h-px w-12 bg-amber-700/40" />
+        <div className="text-center mb-6">
+          <p className="text-xs tracking-[0.35em] uppercase mb-2" style={{ color: '#B8860B' }}>Review Your RSVP</p>
+          <h1 className="font-serif text-2xl" style={{ color: '#2C2C2C' }}>Confirmation</h1>
+        </div>
+
+        {/* Wedding RSVP Card */}
+        <div className="flex rounded-2xl shadow-xl overflow-hidden border" style={{ borderColor: '#e0d3b0', background: '#FDFAF5' }}>
+
+          {/* Kente strip — left */}
+          <div className="kente-strip flex-shrink-0" style={{ width: 20 }} />
+
+          {/* Card body */}
+          <div className="flex-1 relative overflow-hidden">
+            {/* Top gold rule */}
+            <div className="h-1" style={{ background: 'linear-gradient(90deg, #B8860B, #FFD700, #B8860B)' }} />
+
+            <div className="px-7 py-8">
+
+              {/* Couple names */}
+              <div className="text-center mb-1">
+                <p className="text-xs tracking-[0.3em] uppercase mb-3" style={{ color: '#B8860B' }}>
+                  Together with their families
+                </p>
+                <h2 className="font-serif leading-tight" style={{ fontSize: 26, color: '#B8860B' }}>
+                  Solomon Takyi
+                </h2>
+                <p className="font-serif italic text-lg my-0.5" style={{ color: '#2C2C2C', opacity: 0.55 }}>&amp;</p>
+                <h2 className="font-serif leading-tight" style={{ fontSize: 26, color: '#B8860B' }}>
+                  Anne Agyare
+                </h2>
+                <p className="text-xs tracking-[0.22em] uppercase mt-2" style={{ color: '#1B5E20' }}>
+                  Marriage Ceremony
+                </p>
+              </div>
+
+              <Divider star />
+
+              {/* Event details */}
+              <div className="text-center space-y-1 text-sm" style={{ color: '#2C2C2C' }}>
+                <p className="font-semibold">Friday, September 4, 2026</p>
+                <p style={{ opacity: 0.75 }}>2:00 PM</p>
+                <p className="font-medium mt-1">La Maison</p>
+                <p className="text-xs" style={{ opacity: 0.6 }}>33 Washington Ave, Belleville, NJ 07109</p>
+                <p className="text-xs tracking-widest uppercase mt-2 font-semibold" style={{ color: '#1B5E20' }}>
+                  Dress Code: Kente
+                </p>
+              </div>
+
+              <Divider />
+
+              {/* Bible verse */}
+              <p className="text-center text-xs italic leading-relaxed px-2" style={{ color: '#2C2C2C', opacity: 0.65 }}>
+                &ldquo;The Lord God said, it is not good for the man to be alone.
+                I will make a helper suitable for him.&rdquo;
+              </p>
+              <p className="text-center text-xs font-semibold mt-1.5 tracking-wide" style={{ color: '#B8860B' }}>
+                — Genesis 2:18
+              </p>
+
+              <Divider star />
+
+              {/* Guest info */}
+              <div className="text-center">
+                <p className="text-xs tracking-[0.35em] uppercase mb-1" style={{ color: '#B8860B' }}>Guest</p>
+                <h3 className="font-serif text-2xl" style={{ color: '#2C2C2C' }}>{fullName}</h3>
+                <div className="text-xs mt-2 space-y-0.5" style={{ color: '#2C2C2C', opacity: 0.55 }}>
+                  <p>{data.email}</p>
+                  <p>{data.phone}</p>
+                </div>
+              </div>
+
+              {/* Attendance badge */}
+              <div className="flex justify-center mt-4">
+                <span
+                  className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full text-xs tracking-widest uppercase font-semibold border"
+                  style={data.attending
+                    ? { background: '#f0fdf4', color: '#1B5E20', borderColor: '#1B5E20' }
+                    : { background: '#f5f5f5', color: '#555', borderColor: '#ccc' }}
+                >
+                  {data.attending ? '✓ Joyfully Accepts' : '✗ Regretfully Declines'}
+                </span>
+              </div>
+
+              {/* Botanical leaves — bottom corners */}
+              <div className="relative flex justify-between mt-6 -mb-2 px-1 pointer-events-none">
+                <BotanicalLeaf />
+                <BotanicalLeaf flip />
+              </div>
+            </div>
+
+            {/* Bottom gold rule */}
+            <div className="h-1" style={{ background: 'linear-gradient(90deg, #B8860B, #FFD700, #B8860B)' }} />
           </div>
         </div>
 
-        {/* Elegant RSVP Card */}
-        <div
-          className="relative rounded-2xl shadow-lg overflow-hidden border border-amber-200"
-          style={{ background: 'linear-gradient(145deg, #fefcf3 0%, #faf5e4 50%, #fdf8ec 100%)' }}
-        >
-          {/* Top border accent */}
-          <div className="h-1.5 bg-gradient-to-r from-amber-700 via-amber-500 to-amber-700" />
-
-          <div className="px-8 py-10 text-center">
-            {/* Monogram / ornament */}
-            <div className="flex items-center justify-center gap-3 mb-8">
-              <div className="h-px flex-1 bg-amber-600/30" />
-              <div className="text-amber-600 text-xl">✦</div>
-              <div className="h-px flex-1 bg-amber-600/30" />
-            </div>
-
-            <p className="text-xs tracking-[0.35em] uppercase text-amber-700 mb-2">Guest</p>
-            <h2 className="font-serif text-3xl text-stone-800 mb-1">{fullName}</h2>
-
-            <div className="flex items-center justify-center gap-3 my-6">
-              <div className="h-px w-8 bg-amber-600/30" />
-              <div className="w-1 h-1 rounded-full bg-amber-600/50" />
-              <div className="h-px w-8 bg-amber-600/30" />
-            </div>
-
-            <div className="space-y-2 text-sm text-stone-600 mb-6">
-              <p>{data.email}</p>
-              <p>{data.phone}</p>
-            </div>
-
-            <div
-              className={`inline-flex items-center gap-2 px-5 py-2 rounded-full text-xs tracking-widest uppercase font-semibold ${
-                data.attending
-                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                  : 'bg-stone-100 text-stone-500 border border-stone-200'
-              }`}
-            >
-              <span>{data.attending ? '✓' : '✗'}</span>
-              {data.attending ? 'Joyfully Accepts' : 'Regretfully Declines'}
-            </div>
-
-            <div className="flex items-center justify-center gap-3 mt-8">
-              <div className="h-px flex-1 bg-amber-600/30" />
-              <div className="text-amber-600 text-xl">✦</div>
-              <div className="h-px flex-1 bg-amber-600/30" />
-            </div>
-          </div>
-
-          {/* Bottom border accent */}
-          <div className="h-1.5 bg-gradient-to-r from-amber-700 via-amber-500 to-amber-700" />
-        </div>
-
-        {error && (
-          <p className="mt-4 text-center text-red-500 text-sm">{error}</p>
-        )}
+        {error && <p className="mt-4 text-center text-red-500 text-sm">{error}</p>}
 
         <div className="mt-5 space-y-3">
           <button
             onClick={handleConfirm}
             disabled={submitting}
-            className="w-full bg-stone-800 hover:bg-stone-700 text-white rounded-lg py-3 text-sm tracking-widest uppercase transition disabled:opacity-60"
+            className="w-full rounded-lg py-3 text-sm tracking-widest uppercase text-white transition disabled:opacity-60"
+            style={{ background: '#B8860B' }}
+            onMouseEnter={e => !submitting && (e.currentTarget.style.background = '#9a700a')}
+            onMouseLeave={e => (e.currentTarget.style.background = '#B8860B')}
           >
             {submitting ? 'Confirming…' : 'Confirm RSVP'}
           </button>
-
           <button
             onClick={() => router.push('/form')}
             disabled={submitting}
-            className="w-full text-center text-xs text-stone-400 hover:text-stone-600 transition py-1"
+            className="w-full text-center text-xs transition py-1"
+            style={{ color: '#2C2C2C', opacity: 0.4 }}
           >
             ← Edit Details
           </button>

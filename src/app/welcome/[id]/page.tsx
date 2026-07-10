@@ -1,15 +1,9 @@
-'use client';
+import { notFound } from 'next/navigation';
+import { createServiceClient } from '@/lib/supabase';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+type Props = { params: Promise<{ id: string }> };
 
-type FormData = {
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  attending: boolean;
-};
+const PHOTOS_URL = 'https://drive.google.com/drive/folders/15bBYA-TGtC2SHhTbLprLiqRAniDxty4s?usp=sharing';
 
 function Divider({ star = false }: { star?: boolean }) {
   return (
@@ -30,83 +24,53 @@ function BotanicalLeaf({ flip = false }: { flip?: boolean }) {
       xmlns="http://www.w3.org/2000/svg"
       style={{ transform: flip ? 'scaleX(-1)' : undefined }}
     >
-      {/* Main center stem */}
       <line x1="32" y1="68" x2="32" y2="12" stroke="#B8860B" strokeWidth="1.1" strokeOpacity="0.55"/>
-      {/* Primary leaf */}
       <path d="M32 12 C16 20 10 44 32 66 C54 44 48 20 32 12 Z"
         fill="#B8860B" fillOpacity="0.07" stroke="#B8860B" strokeWidth="1" strokeOpacity="0.5"/>
-      {/* Leaf veins */}
       <path d="M32 28 Q22 32 19 42" stroke="#B8860B" strokeWidth="0.75" strokeOpacity="0.45"/>
       <path d="M32 28 Q42 32 45 42" stroke="#B8860B" strokeWidth="0.75" strokeOpacity="0.45"/>
       <path d="M32 44 Q24 47 22 55" stroke="#B8860B" strokeWidth="0.75" strokeOpacity="0.3"/>
       <path d="M32 44 Q40 47 42 55" stroke="#B8860B" strokeWidth="0.75" strokeOpacity="0.3"/>
-      {/* Left side sprig */}
       <path d="M32 22 C24 16 14 22 18 32 C24 24 32 22 32 22 Z"
         fill="#B8860B" fillOpacity="0.07" stroke="#B8860B" strokeWidth="0.85" strokeOpacity="0.45"/>
-      {/* Right side sprig */}
       <path d="M32 22 C40 16 50 22 46 32 C40 24 32 22 32 22 Z"
         fill="#B8860B" fillOpacity="0.07" stroke="#B8860B" strokeWidth="0.85" strokeOpacity="0.45"/>
     </svg>
   );
 }
 
-export default function PreviewPage() {
-  const router = useRouter();
-  const [data, setData] = useState<FormData | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
+export default async function WelcomePage({ params }: Props) {
+  const { id } = await params;
 
-  useEffect(() => {
-    const raw = sessionStorage.getItem('rsvp_form');
-    if (!raw) { router.replace('/form'); return; }
-    try { setData(JSON.parse(raw)); } catch { router.replace('/form'); }
-  }, [router]);
+  const db = createServiceClient();
+  const { data: guest, error } = await db
+    .from('seating')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
 
-  async function handleConfirm() {
-    if (!data) return;
-    setSubmitting(true);
-    setError('');
-    try {
-      const res = await fetch('/api/rsvp/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      const json = await res.json();
-      if (!res.ok) { setError(json.error || 'Something went wrong.'); setSubmitting(false); return; }
-      sessionStorage.removeItem('rsvp_form');
-      router.push(`/rsvp/${json.token}`);
-    } catch {
-      setError('Network error. Please try again.');
-      setSubmitting(false);
-    }
+  if (error || !guest) {
+    notFound();
   }
 
-  if (!data) return null;
-
-  const fullName = `${data.first_name} ${data.last_name}`;
+  const fullName = `${guest.first_name} ${guest.last_name}`;
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-4 py-12" style={{ background: '#FDFAF5' }}>
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
-          <p className="text-xs tracking-[0.35em] uppercase mb-2" style={{ color: '#B8860B' }}>Review Your RSVP</p>
-          <h1 className="font-serif text-2xl" style={{ color: '#2C2C2C' }}>Confirmation</h1>
+          <p className="text-xs tracking-[0.35em] uppercase mb-2" style={{ color: '#B8860B' }}>Welcome</p>
+          <h1 className="font-serif text-2xl" style={{ color: '#2C2C2C' }}>{fullName}</h1>
         </div>
 
-        {/* Wedding RSVP Card */}
+        {/* Welcome card */}
         <div className="flex rounded-2xl shadow-xl overflow-hidden border" style={{ borderColor: '#e0d3b0', background: '#FDFAF5' }}>
-
-          {/* Kente strip — left */}
           <div className="kente-strip flex-shrink-0" style={{ width: 20 }} />
 
-          {/* Card body */}
           <div className="flex-1 relative overflow-hidden">
-            {/* Top gold rule */}
             <div className="h-1" style={{ background: 'linear-gradient(90deg, #B8860B, #FFD700, #B8860B)' }} />
 
             <div className="px-7 py-8">
-
               {/* Couple names */}
               <div className="text-center mb-1">
                 <p className="text-xs tracking-[0.3em] uppercase mb-3" style={{ color: '#B8860B' }}>
@@ -150,61 +114,42 @@ export default function PreviewPage() {
 
               <Divider star />
 
-              {/* Guest info */}
+              {/* Table number */}
               <div className="text-center">
-                <p className="text-xs tracking-[0.35em] uppercase mb-1" style={{ color: '#B8860B' }}>Guest</p>
-                <h3 className="font-serif text-2xl" style={{ color: '#2C2C2C' }}>{fullName}</h3>
-                <div className="text-xs mt-2 space-y-0.5" style={{ color: '#2C2C2C', opacity: 0.55 }}>
-                  <p>{data.email}</p>
-                  <p>{data.phone}</p>
-                </div>
+                <p className="text-xs tracking-[0.35em] uppercase mb-1" style={{ color: '#B8860B' }}>Your Table</p>
+                <p className="font-serif" style={{ fontSize: 48, color: '#1B5E20', lineHeight: 1.1 }}>
+                  {guest.table_number}
+                </p>
+                {guest.seat_number != null && (
+                  <p className="text-xs tracking-widest uppercase" style={{ color: '#2C2C2C', opacity: 0.5 }}>
+                    Seat {guest.seat_number}
+                  </p>
+                )}
               </div>
 
-              {/* Attendance badge */}
-              <div className="flex justify-center mt-4">
-                <span
-                  className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full text-xs tracking-widest uppercase font-semibold border"
-                  style={data.attending
-                    ? { background: '#f0fdf4', color: '#1B5E20', borderColor: '#1B5E20' }
-                    : { background: '#f5f5f5', color: '#555', borderColor: '#ccc' }}
+              {/* Photos link */}
+              <Divider />
+              <div className="text-center">
+                <a
+                  href={PHOTOS_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block w-full rounded-lg py-3 text-sm tracking-widest uppercase text-white transition"
+                  style={{ background: '#B8860B' }}
                 >
-                  {data.attending ? '✓ Joyfully Accepts' : '✗ Regretfully Declines'}
-                </span>
+                  View Wedding Photos
+                </a>
               </div>
 
-              {/* Botanical leaves — bottom corners */}
+              {/* Botanical leaves */}
               <div className="relative flex justify-between mt-6 -mb-2 px-1 pointer-events-none">
                 <BotanicalLeaf />
                 <BotanicalLeaf flip />
               </div>
             </div>
 
-            {/* Bottom gold rule */}
             <div className="h-1" style={{ background: 'linear-gradient(90deg, #B8860B, #FFD700, #B8860B)' }} />
           </div>
-        </div>
-
-        {error && <p className="mt-4 text-center text-red-500 text-sm">{error}</p>}
-
-        <div className="mt-5 space-y-3">
-          <button
-            onClick={handleConfirm}
-            disabled={submitting}
-            className="w-full rounded-lg py-3 text-sm tracking-widest uppercase text-white transition disabled:opacity-60"
-            style={{ background: '#B8860B' }}
-            onMouseEnter={e => !submitting && (e.currentTarget.style.background = '#9a700a')}
-            onMouseLeave={e => (e.currentTarget.style.background = '#B8860B')}
-          >
-            {submitting ? 'Confirming…' : 'Confirm RSVP'}
-          </button>
-          <button
-            onClick={() => router.push('/form')}
-            disabled={submitting}
-            className="w-full text-center text-xs transition py-1"
-            style={{ color: '#2C2C2C', opacity: 0.4 }}
-          >
-            ← Edit Details
-          </button>
         </div>
       </div>
     </main>

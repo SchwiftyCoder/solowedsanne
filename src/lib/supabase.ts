@@ -1,14 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Both clients are factory functions so Supabase is never instantiated at module
-// evaluation time (which happens during Next.js build with placeholder env vars).
-
-export function createBrowserClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-}
+// Factory function so Supabase is never instantiated at module evaluation time
+// (which happens during Next.js build with placeholder env vars).
 
 export function createServiceClient() {
   return createClient(
@@ -18,14 +11,14 @@ export function createServiceClient() {
   );
 }
 
-export type Guest = {
+export type Seating = {
   id: string;
   first_name: string;
   last_name: string;
   email: string;
   phone: string;
-  attending: boolean;
-  rsvp_token: string;
+  table_number: number;
+  seat_number: number | null;
   created_at: string;
   updated_at: string;
 };

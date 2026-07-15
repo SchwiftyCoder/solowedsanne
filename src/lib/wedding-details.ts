@@ -1,7 +1,7 @@
 export const WEDDING_DETAILS = {
   coupleNames: 'Solomon Takyi & Anne Agyare',
   dateText: 'Friday, September 4, 2026',
-  timeText: '5:30 PM – 11:30 PM',
+  timeText: '5:30 PM - 11:30 PM',
   venueName: 'La Maison',
   venueAddress: '33 Washington Ave, Belleville, NJ 07109',
   dressCode: 'Kente',

@@ -15,10 +15,15 @@ Usage:
   $env:SUPABASE_URL = "https://xxxx.supabase.co"
   $env:SUPABASE_SERVICE_ROLE_KEY = "..."
   ./scripts/import-seating.ps1 -CsvPath "C:\path\to\RSVP export.csv"
+
+  # Importing a separate family list into different tables, flagged as family:
+  ./scripts/import-seating.ps1 -CsvPath "C:\path\to\family RSVP export.csv" -IsFamily -StartingTable 12
 #>
 param(
     [Parameter(Mandatory = $true)][string]$CsvPath,
-    [int]$GuestsPerTable = 8
+    [int]$GuestsPerTable = 8,
+    [int]$StartingTable = 1,
+    [switch]$IsFamily
 )
 
 $ErrorActionPreference = "Stop"
@@ -30,6 +35,10 @@ if (-not $env:SUPABASE_URL -or -not $env:SUPABASE_SERVICE_ROLE_KEY) {
 
 function Normalize-Phone([string]$raw) {
     $digits = ($raw -replace '\D', '')
+    # "00" is the international dialing prefix used in place of "+" outside the Americas
+    if ($digits.StartsWith('00') -and $digits.Length -gt 2) {
+        return "+$($digits.Substring(2))"
+    }
     if ($digits.Length -eq 11 -and $digits.StartsWith('1')) {
         return "+$digits"
     }
@@ -58,7 +67,7 @@ if (-not $firstNameCol -or -not $lastNameCol -or -not $phoneCol) {
 }
 
 $rows = @()
-$tableNumber = 1
+$tableNumber = $StartingTable
 $guestInTable = 0
 
 foreach ($row in $csvRows) {
@@ -79,6 +88,9 @@ foreach ($row in $csvRows) {
     }
 
     $phone = Normalize-Phone ([string]$row.$phoneCol)
+    if ($phone -match '^\+0') {
+        Write-Warning "Phone for $firstName $lastName ('$($row.$phoneCol)') normalized to '$phone', which looks malformed - check it manually in Supabase."
+    }
     $email = if ($emailCol) { ([string]$row.$emailCol).Trim().ToLower() } else { '' }
     $message = if ($messageCol) { ([string]$row.$messageCol).Trim() } else { '' }
 
@@ -95,6 +107,7 @@ foreach ($row in $csvRows) {
         phone        = $phone
         table_number = $tableNumber
         message      = $message
+        is_family    = [bool]$IsFamily
     }
 }
 

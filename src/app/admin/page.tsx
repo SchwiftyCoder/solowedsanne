@@ -17,6 +17,30 @@ type Guest = {
 type SmsResult = { total: number; sent: number; failed: number; errors: { to: string; error?: string }[] };
 type SendKind = 'reminder' | 'thankyou';
 type CustomStep = 'compose' | 'preview';
+type SortKey = 'name' | 'phone' | 'email' | 'table' | 'family' | 'message';
+
+function familyRank(v: boolean | null) {
+  if (v === false) return 0;
+  if (v === true) return 1;
+  return 2;
+}
+
+function compareGuests(a: Guest, b: Guest, key: SortKey): number {
+  switch (key) {
+    case 'name':
+      return `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`);
+    case 'phone':
+      return a.phone.localeCompare(b.phone);
+    case 'email':
+      return a.email.localeCompare(b.email);
+    case 'table':
+      return a.table_number - b.table_number;
+    case 'family':
+      return familyRank(a.is_family) - familyRank(b.is_family);
+    case 'message':
+      return a.message.localeCompare(b.message);
+  }
+}
 
 export default function AdminPage() {
   const [guests, setGuests] = useState<Guest[] | null>(null);
@@ -31,6 +55,11 @@ export default function AdminPage() {
   const [customResult, setCustomResult] = useState<SmsResult | null>(null);
 
   const [showGuestList, setShowGuestList] = useState(true);
+  const [sort, setSort] = useState<{ key: SortKey; dir: 'asc' | 'desc' }>({ key: 'table', dir: 'asc' });
+
+  function toggleSort(key: SortKey) {
+    setSort((prev) => (prev.key === key ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' }));
+  }
 
   useEffect(() => {
     loadGuests();
@@ -119,6 +148,9 @@ export default function AdminPage() {
   }
 
   const tableCount = guests ? new Set(guests.map((g) => g.table_number)).size : 0;
+  const sortedGuests = guests
+    ? [...guests].sort((a, b) => (sort.dir === 'asc' ? 1 : -1) * compareGuests(a, b, sort.key))
+    : null;
 
   return (
     <main className="min-h-screen px-4 py-12" style={{ background: '#FDFAF5' }}>
@@ -265,17 +297,17 @@ export default function AdminPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="text-left uppercase text-xs tracking-wide" style={{ color: '#B8860B' }}>
-                    <th className="px-6 py-2">Guest</th>
-                    <th className="px-4 py-2">Phone</th>
-                    <th className="px-4 py-2">Email</th>
-                    <th className="px-4 py-2">Table</th>
-                    <th className="px-4 py-2">Family</th>
-                    <th className="px-4 py-2">Message</th>
+                    <SortableHeader className="px-6 py-2" label="Guest" sortKey="name" sort={sort} onSort={toggleSort} />
+                    <SortableHeader className="px-4 py-2" label="Phone" sortKey="phone" sort={sort} onSort={toggleSort} />
+                    <SortableHeader className="px-4 py-2" label="Email" sortKey="email" sort={sort} onSort={toggleSort} />
+                    <SortableHeader className="px-4 py-2" label="Table" sortKey="table" sort={sort} onSort={toggleSort} />
+                    <SortableHeader className="px-4 py-2" label="Family" sortKey="family" sort={sort} onSort={toggleSort} />
+                    <SortableHeader className="px-4 py-2" label="Message" sortKey="message" sort={sort} onSort={toggleSort} />
                     <th className="px-6 py-2"></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {guests.map((g) => {
+                  {sortedGuests!.map((g) => {
                     const status = rowStatus[g.id];
                     return (
                       <tr key={g.id} className="border-t" style={{ borderColor: '#f5efdc', color: '#2C2C2C' }}>
@@ -309,6 +341,34 @@ export default function AdminPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+function SortableHeader({
+  label,
+  sortKey,
+  sort,
+  onSort,
+  className,
+}: {
+  label: string;
+  sortKey: SortKey;
+  sort: { key: SortKey; dir: 'asc' | 'desc' };
+  onSort: (key: SortKey) => void;
+  className: string;
+}) {
+  const active = sort.key === sortKey;
+  return (
+    <th className={className}>
+      <button
+        onClick={() => onSort(sortKey)}
+        className="flex items-center gap-1 uppercase text-xs tracking-wide"
+        style={{ color: '#B8860B' }}
+      >
+        {label}
+        <span style={{ opacity: active ? 1 : 0.3 }}>{active && sort.dir === 'desc' ? '▼' : '▲'}</span>
+      </button>
+    </th>
   );
 }
 

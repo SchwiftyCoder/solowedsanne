@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createServiceClient } from '@/lib/supabase';
 import { WEDDING_DETAILS } from '@/lib/wedding-details';
@@ -97,6 +98,12 @@ export default async function WelcomePage({ params }: Props) {
           </div>
 
           <div className="h-1" style={{ background: 'linear-gradient(90deg, #B8860B, #FFD700, #B8860B)' }} />
+        </div>
+
+        <div className="text-center mt-6">
+          <Link href="/" className="text-xs uppercase tracking-widest underline" style={{ color: '#B8860B' }}>
+            Look Up Another Guest
+          </Link>
         </div>
       </div>
     </main>

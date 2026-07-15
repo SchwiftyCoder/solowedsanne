@@ -27,7 +27,7 @@ export async function POST() {
     const recipients = guests.map((g) => ({
       to: g.phone,
       body:
-        `Hi ${g.first_name}! Thank you so much for celebrating with ${WEDDING_DETAILS.coupleNames} on our wedding day — ` +
+        `Hi ${g.first_name}! Thank you so much for celebrating with ${WEDDING_DETAILS.coupleNames} on our wedding day - ` +
         `it meant the world to have you there. Relive the day and add your own photos here: ${WEDDING_DETAILS.photosUrl}`,
     }));
 

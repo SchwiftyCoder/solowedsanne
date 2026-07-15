@@ -19,6 +19,7 @@ export type Seating = {
   phone: string;
   table_number: number;
   seat_number: number | null;
+  message: string;
   created_at: string;
   updated_at: string;
 };

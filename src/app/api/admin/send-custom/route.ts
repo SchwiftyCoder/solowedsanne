@@ -1,15 +1,20 @@
 import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { sendBulkSms } from '@/lib/twilio';
-import { reminderMessage } from '@/lib/wedding-details';
 
-export async function POST() {
+export async function POST(req: Request) {
   try {
+    const { message } = await req.json();
+
+    if (typeof message !== 'string' || !message.trim()) {
+      return NextResponse.json({ error: 'Message is required' }, { status: 400 });
+    }
+
     const db = createServiceClient();
-    const { data: guests, error } = await db.from('seating').select('id, first_name, phone');
+    const { data: guests, error } = await db.from('seating').select('id, phone');
 
     if (error) {
-      console.error('[admin/send-reminder] DB error:', error);
+      console.error('[admin/send-custom] DB error:', error);
       return NextResponse.json({ error: 'Database error' }, { status: 500 });
     }
 
@@ -17,11 +22,7 @@ export async function POST() {
       return NextResponse.json({ error: 'No guests found' }, { status: 400 });
     }
 
-    const recipients = guests.map((g) => ({
-      to: g.phone,
-      body: reminderMessage(g.first_name, g.id),
-    }));
-
+    const recipients = guests.map((g) => ({ to: g.phone, body: message.trim() }));
     const results = await sendBulkSms(recipients);
     const failed = results.filter((r) => !r.success);
 
@@ -32,7 +33,7 @@ export async function POST() {
       errors: failed,
     });
   } catch (err) {
-    console.error('[admin/send-reminder] Unexpected error:', err);
+    console.error('[admin/send-custom] Unexpected error:', err);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }

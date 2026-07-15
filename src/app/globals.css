@@ -19,17 +19,3 @@ body {
 .font-serif {
   font-family: 'Playfair Display', serif;
 }
-
-.kente-strip {
-  background: repeating-linear-gradient(
-    180deg,
-    #CC0000   0px,  #CC0000  10px,
-    #000000  10px,  #000000  12px,
-    #FFD700  12px,  #FFD700  22px,
-    #000000  22px,  #000000  24px,
-    #1B5E20  24px,  #1B5E20  34px,
-    #000000  34px,  #000000  36px,
-    #FFD700  36px,  #FFD700  46px,
-    #000000  46px,  #000000  48px
-  );
-}

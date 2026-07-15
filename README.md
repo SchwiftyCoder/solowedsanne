@@ -51,15 +51,15 @@ SITE_URL=http://localhost:3000   # update to your real domain after deploying
 
 ## 5. Import the guest list
 
-`scripts/import-seating.ps1` reads an Excel sheet named **"Ghana Wedding Guests"** with columns `First Name | Last Name | Phone Number | Email | Seat Position` (seat position formatted like `Table 1 - Seat 1`) and upserts it into the `seating` table. This matches the format of `dummy wedding guest list.xlsx` in your Downloads folder — replace that with your real 100-guest list using the same column layout, then run:
+`scripts/import-seating.ps1` reads the Google Forms RSVP CSV export (Timestamp, First Name, Last Name, phone number, email, RSVP answer, message) and auto-assigns table/seat numbers in row order (8 guests per table by default — pass `-GuestsPerTable` to change it). Each run truncates and re-inserts the whole `seating` table, so it's safe to re-run whenever the guest list changes:
 
 ```powershell
 $env:SUPABASE_URL = "https://your-project.supabase.co"
 $env:SUPABASE_SERVICE_ROLE_KEY = "your-service-role-key"
-./scripts/import-seating.ps1 -ExcelPath "C:\path\to\your guest list.xlsx"
+./scripts/import-seating.ps1 -CsvPath "C:\path\to\RSVP export.csv"
 ```
 
-(Requires Microsoft Excel installed, since the script drives it via COM automation.)
+Since there's no seating chart yet, table/seat numbers start as a placeholder — reassign guests to specific tables afterward directly in the Supabase table editor.
 
 ## 6. Run the dev server
 

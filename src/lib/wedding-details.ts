@@ -1,11 +1,11 @@
 export const WEDDING_DETAILS = {
   coupleNames: 'Solomon Takyi & Anne Agyare',
   dateText: 'Friday, September 4, 2026',
-  timeText: '2:00 PM',
+  timeText: '5:30 PM – 11:30 PM',
   venueName: 'La Maison',
   venueAddress: '33 Washington Ave, Belleville, NJ 07109',
   dressCode: 'Kente',
-  photosUrl: 'https://drive.google.com/drive/folders/15bBYA-TGtC2SHhTbLprLiqRAniDxty4s?usp=sharing',
+  photosUrl: 'https://drive.google.com/drive/folders/1cFeEVVjZsBcvg-IQMUT3jO8b0z3atXdD?usp=sharing',
 } as const;
 
 export function siteUrl() {
@@ -14,4 +14,18 @@ export function siteUrl() {
 
 export function welcomeUrl(id: string) {
   return `${siteUrl()}/welcome/${id}`;
+}
+
+export function venueMapsUrl() {
+  const query = `${WEDDING_DETAILS.venueName}, ${WEDDING_DETAILS.venueAddress}`;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+}
+
+export function reminderMessage(firstName: string, id: string) {
+  return (
+    `Hi ${firstName}! Reminder for ${WEDDING_DETAILS.coupleNames}'s wedding: ` +
+    `${WEDDING_DETAILS.dateText} at ${WEDDING_DETAILS.timeText}, ${WEDDING_DETAILS.venueName}. ` +
+    `Directions: ${venueMapsUrl()} ` +
+    `Dress code: ${WEDDING_DETAILS.dressCode}. Find your table: ${welcomeUrl(id)}`
+  );
 }

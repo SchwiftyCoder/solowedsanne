@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { AmpersandEmblem, BotanicalLeaf, CalendarIcon, PinIcon } from '@/components/WeddingMotifs';
 
 type Match = { id: string; name: string };
 
@@ -55,7 +56,7 @@ export default function EntryPage() {
           <h1 className="font-serif text-3xl md:text-4xl leading-snug" style={{ color: '#2C2C2C' }}>
             Solomon Takyi
           </h1>
-          <p className="font-serif text-xl italic mt-1 mb-1" style={{ color: '#B8860B' }}>&amp;</p>
+          <AmpersandEmblem />
           <h1 className="font-serif text-3xl md:text-4xl leading-snug" style={{ color: '#2C2C2C' }}>
             Anne Agyare
           </h1>
@@ -73,7 +74,7 @@ export default function EntryPage() {
         </div>
 
         {/* Card */}
-        <div className="rounded-2xl shadow-sm px-8 py-10 border" style={{ background: '#fff', borderColor: '#e8dfc8' }}>
+        <div className="rounded-2xl shadow-sm overflow-hidden border px-8 py-10" style={{ background: '#fff', borderColor: '#e8dfc8' }}>
           {matches ? (
             <div className="space-y-3">
               <p className="text-xs tracking-widest uppercase mb-2" style={{ color: '#B8860B' }}>
@@ -134,9 +135,15 @@ export default function EntryPage() {
           )}
         </div>
 
-        <p className="text-center text-xs mt-6" style={{ color: '#2C2C2C', opacity: 0.4 }}>
-          Friday, September 4, 2026 · La Maison, Belleville NJ
-        </p>
+        <div className="flex items-center justify-center gap-4 mt-6 text-xs" style={{ color: '#2C2C2C', opacity: 0.55 }}>
+          <span className="flex items-center gap-1.5"><CalendarIcon /> Friday, September 4, 2026</span>
+          <span className="flex items-center gap-1.5"><PinIcon /> La Maison, Belleville NJ</span>
+        </div>
+
+        <div className="relative flex justify-between mt-6 px-1 pointer-events-none">
+          <BotanicalLeaf />
+          <BotanicalLeaf flip />
+        </div>
       </div>
     </main>
   );

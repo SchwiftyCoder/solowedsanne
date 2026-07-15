@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { WEDDING_DETAILS } from '@/lib/wedding-details';
+import { WEDDING_DETAILS, isThankYouAvailable, thankYouAvailableAt } from '@/lib/wedding-details';
 
 type Guest = {
   id: string;
@@ -29,6 +29,8 @@ export default function AdminPage() {
   const [customMessage, setCustomMessage] = useState('');
   const [customSending, setCustomSending] = useState(false);
   const [customResult, setCustomResult] = useState<SmsResult | null>(null);
+
+  const [showGuestList, setShowGuestList] = useState(true);
 
   useEffect(() => {
     loadGuests();
@@ -154,10 +156,14 @@ export default function AdminPage() {
 
           <AdminAction
             title="Send Thank You Message"
-            description="Texts every guest a thank-you note with the photo album link. Send this after the wedding."
+            description={
+              isThankYouAvailable()
+                ? "Texts every guest a thank-you note with the photo album link. Send this after the wedding."
+                : `Texts every guest a thank-you note with the photo album link. Unlocks ${thankYouAvailableAt().toLocaleDateString()} (one month after the wedding).`
+            }
             buttonLabel="Send Thank You to All"
             busy={sending === 'thankyou'}
-            disabled={sending !== null || !guests?.length}
+            disabled={sending !== null || !guests?.length || !isThankYouAvailable()}
             onClick={() => handleSend('thankyou')}
             result={result.thankyou}
           />
@@ -166,7 +172,8 @@ export default function AdminPage() {
           <div className="rounded-2xl shadow-sm px-6 py-6 border" style={{ background: '#fff', borderColor: '#e8dfc8' }}>
             <h2 className="font-serif text-lg mb-1" style={{ color: '#2C2C2C' }}>Send Custom Message</h2>
             <p className="text-sm mb-4" style={{ color: '#2C2C2C', opacity: 0.6 }}>
-              Write your own SMS to text every guest. You&apos;ll preview the exact text before anything sends.
+              Write your own SMS to text every guest. Each text is automatically prefixed with &ldquo;Hi [Guest Name]!&rdquo;
+              so every message is personalized. You&apos;ll preview the exact text before anything sends.
             </p>
 
             {customStep === 'compose' ? (
@@ -191,13 +198,13 @@ export default function AdminPage() {
             ) : (
               <>
                 <p className="text-xs uppercase tracking-widest mb-2" style={{ color: '#B8860B' }}>
-                  Exact text to be sent to all {guests?.length ?? '?'} guests
+                  Example text (name is swapped in per guest) — going to all {guests?.length ?? '?'} guests
                 </p>
                 <div
                   className="rounded-lg px-4 py-3 text-sm border whitespace-pre-wrap mb-4"
                   style={{ borderColor: '#d6cbb0', color: '#2C2C2C', background: '#FDFAF5' }}
                 >
-                  {customMessage}
+                  Hi {guests?.[0]?.first_name ?? 'Guest'}! {customMessage}
                 </div>
                 <div className="flex gap-3">
                   <button
@@ -235,12 +242,21 @@ export default function AdminPage() {
         <div className="rounded-2xl shadow-sm border overflow-hidden" style={{ background: '#fff', borderColor: '#e8dfc8' }}>
           <div className="px-6 py-4 flex items-center justify-between border-b" style={{ borderColor: '#f0e8d4' }}>
             <h2 className="font-serif text-lg" style={{ color: '#2C2C2C' }}>Guest List</h2>
-            <button onClick={loadGuests} className="text-xs underline" style={{ color: '#B8860B' }}>
-              Refresh
-            </button>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setShowGuestList((prev) => !prev)}
+                className="text-xs underline"
+                style={{ color: '#B8860B' }}
+              >
+                {showGuestList ? 'Hide' : 'Show'}
+              </button>
+              <button onClick={loadGuests} className="text-xs underline" style={{ color: '#B8860B' }}>
+                Refresh
+              </button>
+            </div>
           </div>
 
-          {loadError ? (
+          {!showGuestList ? null : loadError ? (
             <p className="px-6 py-6 text-sm" style={{ color: '#B00020' }}>{loadError}</p>
           ) : guests === null ? (
             <p className="px-6 py-6 text-sm" style={{ color: '#2C2C2C', opacity: 0.6 }}>Loading guest list…</p>

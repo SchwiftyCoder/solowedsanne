@@ -1,9 +1,16 @@
 import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { sendBulkSms } from '@/lib/twilio';
-import { WEDDING_DETAILS } from '@/lib/wedding-details';
+import { WEDDING_DETAILS, isThankYouAvailable, thankYouAvailableAt } from '@/lib/wedding-details';
 
 export async function POST() {
+  if (!isThankYouAvailable()) {
+    return NextResponse.json(
+      { error: `Thank-you messages can't be sent until ${thankYouAvailableAt().toLocaleDateString()}.` },
+      { status: 403 }
+    );
+  }
+
   try {
     const db = createServiceClient();
     const { data: guests, error } = await db.from('seating').select('id, first_name, phone');

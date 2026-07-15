@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     }
 
     const db = createServiceClient();
-    const { data: guests, error } = await db.from('seating').select('id, phone');
+    const { data: guests, error } = await db.from('seating').select('id, first_name, phone');
 
     if (error) {
       console.error('[admin/send-custom] DB error:', error);
@@ -22,7 +22,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'No guests found' }, { status: 400 });
     }
 
-    const recipients = guests.map((g) => ({ to: g.phone, body: message.trim() }));
+    const trimmed = message.trim();
+    const recipients = guests.map((g) => ({ to: g.phone, body: `Hi ${g.first_name}! ${trimmed}` }));
     const results = await sendBulkSms(recipients);
     const failed = results.filter((r) => !r.success);
 

@@ -8,6 +8,19 @@ export const WEDDING_DETAILS = {
   photosUrl: 'https://drive.google.com/drive/folders/1cFeEVVjZsBcvg-IQMUT3jO8b0z3atXdD?usp=sharing',
 } as const;
 
+// The actual ceremony date, used to gate the thank-you send until a month after.
+export const WEDDING_DATE = new Date('2026-09-04T00:00:00');
+
+export function thankYouAvailableAt(): Date {
+  const d = new Date(WEDDING_DATE);
+  d.setMonth(d.getMonth() + 1);
+  return d;
+}
+
+export function isThankYouAvailable(): boolean {
+  return Date.now() >= thankYouAvailableAt().getTime();
+}
+
 export function siteUrl() {
   return (process.env.SITE_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000').replace(/\/$/, '');
 }

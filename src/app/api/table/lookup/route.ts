@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     const db = createServiceClient();
     const { data, error } = await db
       .from('seating')
-      .select('id, first_name, last_name, email, phone, table_number, seat_number');
+      .select('id, first_name, last_name, email, phone, table_number');
 
     if (error) {
       console.error('[table/lookup] DB error:', error);
@@ -55,7 +55,6 @@ export async function GET(req: NextRequest) {
         first_name: m.first_name,
         last_name: m.last_name,
         table_number: m.table_number,
-        seat_number: m.seat_number,
       });
     }
 

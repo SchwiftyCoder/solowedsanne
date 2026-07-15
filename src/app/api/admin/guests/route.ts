@@ -6,9 +6,8 @@ export async function GET() {
     const db = createServiceClient();
     const { data, error } = await db
       .from('seating')
-      .select('id, first_name, last_name, email, phone, table_number, seat_number, message, is_family')
-      .order('table_number', { ascending: true })
-      .order('seat_number', { ascending: true });
+      .select('id, first_name, last_name, email, phone, table_number, message, is_family')
+      .order('table_number', { ascending: true });
 
     if (error) {
       console.error('[admin/guests] DB error:', error);

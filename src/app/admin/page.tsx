@@ -10,7 +10,6 @@ type Guest = {
   email: string;
   phone: string;
   table_number: number;
-  seat_number: number | null;
   message: string;
   is_family: boolean | null;
 };
@@ -255,7 +254,6 @@ export default function AdminPage() {
                     <th className="px-4 py-2">Phone</th>
                     <th className="px-4 py-2">Email</th>
                     <th className="px-4 py-2">Table</th>
-                    <th className="px-4 py-2">Seat</th>
                     <th className="px-4 py-2">Family</th>
                     <th className="px-4 py-2">Message</th>
                     <th className="px-6 py-2"></th>
@@ -270,7 +268,6 @@ export default function AdminPage() {
                         <td className="px-4 py-2" style={{ opacity: 0.75 }}>{g.phone}</td>
                         <td className="px-4 py-2" style={{ opacity: 0.75 }}>{g.email || '—'}</td>
                         <td className="px-4 py-2">{g.table_number}</td>
-                        <td className="px-4 py-2">{g.seat_number ?? '—'}</td>
                         <td className="px-4 py-2" style={{ opacity: 0.75 }}>
                           {g.is_family === null ? '—' : g.is_family ? 'Yes' : 'No'}
                         </td>

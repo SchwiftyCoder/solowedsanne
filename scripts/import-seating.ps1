@@ -2,13 +2,14 @@
 Imports guests straight from the Google Forms RSVP CSV export (Timestamp | First Name |
 Last Name | Phone | Email | RSVP answer | Message) into the Supabase `seating` table.
 
-There's no seating chart yet, so this auto-assigns table/seat numbers in row order
+There's no seating chart yet, so this auto-assigns table numbers in row order
 (GUESTS_PER_TABLE per table) as a placeholder - move people between tables afterward
 directly in the Supabase table editor if needed.
 
-Each run truncates and re-inserts the whole `seating` table, so it's safe to re-run
-whenever the guest list changes. (A merge-on-conflict upsert isn't reliable here because
-several couples share one phone number.)
+Upserts on the (first_name, last_name, phone) identity key, so re-running this after
+the guest list changes updates existing guests in place (same id, same welcome link)
+instead of deleting and regenerating everyone. Only a guest's first/last name/phone
+change would create a duplicate row rather than update the existing one.
 
 Usage:
   $env:SUPABASE_URL = "https://xxxx.supabase.co"
@@ -58,7 +59,7 @@ if (-not $firstNameCol -or -not $lastNameCol -or -not $phoneCol) {
 
 $rows = @()
 $tableNumber = 1
-$seatNumber = 0
+$guestInTable = 0
 
 foreach ($row in $csvRows) {
     $firstName = ([string]$row.$firstNameCol).Trim()
@@ -81,9 +82,9 @@ foreach ($row in $csvRows) {
     $email = if ($emailCol) { ([string]$row.$emailCol).Trim().ToLower() } else { '' }
     $message = if ($messageCol) { ([string]$row.$messageCol).Trim() } else { '' }
 
-    $seatNumber++
-    if ($seatNumber -gt $GuestsPerTable) {
-        $seatNumber = 1
+    $guestInTable++
+    if ($guestInTable -gt $GuestsPerTable) {
+        $guestInTable = 1
         $tableNumber++
     }
 
@@ -93,7 +94,6 @@ foreach ($row in $csvRows) {
         email        = $email
         phone        = $phone
         table_number = $tableNumber
-        seat_number  = $seatNumber
         message      = $message
     }
 }
@@ -104,11 +104,8 @@ $headers = @{
     "apikey"        = $env:SUPABASE_SERVICE_ROLE_KEY
     "Authorization" = "Bearer $($env:SUPABASE_SERVICE_ROLE_KEY)"
     "Content-Type"  = "application/json"
-    "Prefer"        = "return=minimal"
+    "Prefer"        = "return=minimal,resolution=merge-duplicates"
 }
-
-Write-Host "Clearing existing seating table..."
-Invoke-RestMethod -Uri "$($env:SUPABASE_URL)/rest/v1/seating?id=not.is.null" -Method Delete -Headers $headers | Out-Null
 
 $batchSize = 50
 for ($i = 0; $i -lt $rows.Count; $i += $batchSize) {
@@ -116,8 +113,9 @@ for ($i = 0; $i -lt $rows.Count; $i += $batchSize) {
     $body = $batch | ConvertTo-Json -Depth 3
     if ($batch.Count -eq 1) { $body = "[$body]" }
 
-    Invoke-RestMethod -Uri "$($env:SUPABASE_URL)/rest/v1/seating" -Method Post -Headers $headers -Body $body | Out-Null
-    Write-Host "Inserted rows $($i + 1)-$([Math]::Min($i + $batchSize, $rows.Count))"
+    $uri = "$($env:SUPABASE_URL)/rest/v1/seating?on_conflict=first_name,last_name,phone"
+    Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -Body $body | Out-Null
+    Write-Host "Upserted rows $($i + 1)-$([Math]::Min($i + $batchSize, $rows.Count))"
 }
 
 Write-Host "Done. $($rows.Count) guests imported."

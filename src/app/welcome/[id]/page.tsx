@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { createServiceClient } from '@/lib/supabase';
-import { WEDDING_DETAILS, venueMapsUrl } from '@/lib/wedding-details';
-import { AmpersandEmblem, Divider, BotanicalLeaf, CalendarIcon, ClockIcon, PinIcon } from '@/components/WeddingMotifs';
+import { WEDDING_DETAILS } from '@/lib/wedding-details';
+import { AmpersandEmblem, Divider, BotanicalLeaf } from '@/components/WeddingMotifs';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -53,37 +53,12 @@ export default async function WelcomePage({ params }: Props) {
 
               <Divider star />
 
-              {/* Event details - compact */}
-              <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-center" style={{ color: '#2C2C2C' }}>
-                <span className="flex items-center gap-1"><CalendarIcon /> Fri, Sep 4, 2026</span>
-                <span className="flex items-center gap-1"><ClockIcon /> {WEDDING_DETAILS.timeText}</span>
-                <a
-                  href={venueMapsUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 underline"
-                  style={{ color: '#2C2C2C' }}
-                >
-                  <PinIcon /> La Maison, Belleville NJ
-                </a>
-              </div>
-              <p className="text-center text-xs tracking-widest uppercase mt-2 font-semibold" style={{ color: '#1B5E20' }}>
-                Dress Code: Kente
-              </p>
-
-              <Divider star />
-
               {/* Table number */}
               <div className="text-center">
                 <p className="text-xs tracking-[0.35em] uppercase mb-1" style={{ color: '#B8860B' }}>Your Table</p>
                 <p className="font-serif" style={{ fontSize: 48, color: '#1B5E20', lineHeight: 1.1 }}>
                   {guest.table_number}
                 </p>
-                {guest.seat_number != null && (
-                  <p className="text-xs tracking-widest uppercase" style={{ color: '#2C2C2C', opacity: 0.5 }}>
-                    Seat {guest.seat_number}
-                  </p>
-                )}
               </div>
 
               {guest.message && (
@@ -103,9 +78,6 @@ export default async function WelcomePage({ params }: Props) {
               {/* Photos link */}
               <Divider />
               <div className="text-center">
-                <p className="text-xs italic mb-3" style={{ color: '#2C2C2C', opacity: 0.65 }}>
-                  Upload your beautiful pictures here and view others&apos;!
-                </p>
                 <a
                   href={WEDDING_DETAILS.photosUrl}
                   target="_blank"

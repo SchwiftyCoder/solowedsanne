@@ -18,8 +18,8 @@ export type Seating = {
   email: string;
   phone: string;
   table_number: number;
-  seat_number: number | null;
   message: string;
+  is_family: boolean | null;
   created_at: string;
   updated_at: string;
 };

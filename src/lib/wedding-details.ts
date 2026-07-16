@@ -1,11 +1,14 @@
 export const WEDDING_DETAILS = {
   coupleNames: 'Solomon Takyi & Anne Agyare',
   dateText: 'Friday, September 4, 2026',
-  timeText: '5:30 PM - 11:30 PM',
+  timeText: '2:00 PM',
   venueName: 'La Maison',
   venueAddress: '33 Washington Ave, Belleville, NJ 07109',
   dressCode: 'Kente',
+  // View-only Drive folder - uploads go through photosUploadUrl instead, so
+  // guests never get edit access to the folder itself.
   photosUrl: 'https://drive.google.com/drive/folders/1cFeEVVjZsBcvg-IQMUT3jO8b0z3atXdD?usp=sharing',
+  photosUploadUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSe0JEBWqnBNRAnHgUZaJJE_yrwFdQpr6VuTljINK6RD8zwicg/viewform?usp=publish-editor',
 } as const;
 
 // The actual ceremony date, used to gate the thank-you send until a month after.

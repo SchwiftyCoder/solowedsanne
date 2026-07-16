@@ -28,7 +28,7 @@ export async function POST() {
       to: g.phone,
       body:
         `Hi ${g.first_name}! Thank you so much for celebrating with ${WEDDING_DETAILS.coupleNames} on our wedding day - ` +
-        `it meant the world to have you there. Relive the day and add your own photos here: ${WEDDING_DETAILS.photosUrl}`,
+        `it meant the world to have you there. Add your own photos here: ${WEDDING_DETAILS.photosUploadUrl}`,
     }));
 
     const results = await sendBulkSms(recipients);

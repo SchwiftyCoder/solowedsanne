@@ -62,31 +62,26 @@ export default async function WelcomePage({ params }: Props) {
                 </p>
               </div>
 
-              {guest.message && (
-                <>
-                  <Divider />
-                  <div className="text-center">
-                    <p className="text-xs tracking-[0.3em] uppercase mb-1" style={{ color: '#B8860B' }}>
-                      Your Message to the Couple
-                    </p>
-                    <p className="text-xs italic leading-relaxed px-2" style={{ color: '#2C2C2C', opacity: 0.7 }}>
-                      &ldquo;{guest.message}&rdquo;
-                    </p>
-                  </div>
-                </>
-              )}
-
-              {/* Photos link */}
+              {/* Photos links */}
               <Divider />
-              <div className="text-center">
+              <div className="text-center space-y-3">
                 <a
-                  href={WEDDING_DETAILS.photosUrl}
+                  href={WEDDING_DETAILS.photosUploadUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-block w-full rounded-lg py-3 text-sm tracking-widest uppercase text-white transition"
                   style={{ background: '#B8860B' }}
                 >
-                  Wedding Photo Album
+                  Upload Wedding Photos
+                </a>
+                <a
+                  href={WEDDING_DETAILS.photosUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block w-full rounded-lg py-3 text-sm tracking-widest uppercase transition border"
+                  style={{ borderColor: '#B8860B', color: '#B8860B' }}
+                >
+                  View Photos
                 </a>
               </div>
 

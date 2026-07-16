@@ -165,12 +165,11 @@ export default function AdminPage() {
         </div>
 
         {/* Wedding info card */}
-        <div className="rounded-2xl shadow-sm px-6 py-5 border mb-6 grid grid-cols-3 gap-4 text-sm"
+        <div className="rounded-2xl shadow-sm px-6 py-5 border mb-6 grid grid-cols-2 gap-4 text-sm"
           style={{ background: '#fff', borderColor: '#e8dfc8', color: '#2C2C2C' }}>
-          <InfoStat label="Guests" value={loadError ? '—' : guests === null ? '…' : String(guests.length)} />
           <InfoStat label="Tables" value={loadError ? '—' : guests === null ? '…' : String(tableCount)} />
           <InfoStat label="Date" value={WEDDING_DETAILS.dateText.replace(/^\w+, /, '')} />
-          <div className="col-span-3 text-xs pt-2 border-t" style={{ borderColor: '#f0e8d4', opacity: 0.7 }}>
+          <div className="col-span-2 text-xs pt-2 border-t" style={{ borderColor: '#f0e8d4', opacity: 0.7 }}>
             {WEDDING_DETAILS.timeText} &middot; {WEDDING_DETAILS.venueName}, {WEDDING_DETAILS.venueAddress}
           </div>
         </div>

@@ -11,6 +11,20 @@ export const WEDDING_DETAILS = {
   photosUploadUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSe0JEBWqnBNRAnHgUZaJJE_yrwFdQpr6VuTljINK6RD8zwicg/viewform?usp=publish-editor',
 } as const;
 
+// Placeholder order of events - update times/names to match the real day-of schedule.
+export const WEDDING_PROGRAM = [
+  { time: '2:00 PM', event: 'Ceremony' },
+  { time: '3:00 PM', event: 'Cocktail Hour & Photos' },
+  { time: '4:00 PM', event: 'Grand Entrance' },
+  { time: '4:15 PM', event: 'Blessing & Prayer' },
+  { time: '4:30 PM', event: 'Dinner' },
+  { time: '5:30 PM', event: 'Toasts & Speeches' },
+  { time: '6:00 PM', event: 'Cake Cutting' },
+  { time: '6:15 PM', event: 'First Dance' },
+  { time: '6:30 PM', event: 'Dancing & Celebration' },
+  { time: '9:00 PM', event: 'Send-Off' },
+] as const;
+
 // The actual ceremony date, used to gate the thank-you send until a month after.
 export const WEDDING_DATE = new Date('2026-09-04T00:00:00');
 

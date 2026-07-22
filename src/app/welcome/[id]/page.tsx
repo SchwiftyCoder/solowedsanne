@@ -62,6 +62,18 @@ export default async function WelcomePage({ params }: Props) {
                 </p>
               </div>
 
+              {/* Program link */}
+              <Divider />
+              <div className="text-center">
+                <Link
+                  href={`/welcome/${id}/program`}
+                  className="inline-block w-full rounded-lg py-3 text-sm tracking-widest uppercase transition border"
+                  style={{ borderColor: '#B8860B', color: '#B8860B' }}
+                >
+                  View Wedding Program
+                </Link>
+              </div>
+
               {/* Photos links */}
               <Divider />
               <div className="text-center space-y-3">

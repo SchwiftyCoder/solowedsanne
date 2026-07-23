@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { CircleDollarSign, FileText, Play, Plus, Route, Square, Timer, Wallet } from 'lucide-react';
+import Link from 'next/link';
+import { CircleDollarSign, FileText, HelpCircle, Play, Plus, Route, Square, Timer, Wallet } from 'lucide-react';
 import { loadActiveShift, loadFixedExpenses, loadSettings, loadShifts, saveActiveShift, saveFixedExpenses, saveSettings, saveShifts } from './_lib/storage';
 import { ActiveShift, DEFAULT_SETTINGS, FixedExpense, Settings, Shift } from './_lib/types';
 import { computePacing, mileageDeduction, shiftVariableExpenseTotal, summarizeShifts } from './_lib/calculations';
@@ -19,6 +20,7 @@ import FixedExpensesPanel from './_components/FixedExpensesPanel';
 import SettingsPanel from './_components/SettingsPanel';
 import { StartShiftModal, EndShiftModal } from './_components/QuickShiftModal';
 import ReportModal from './_components/ReportModal';
+import InfoTip from './_components/InfoTip';
 
 export default function DriverDashboard() {
   const [hydrated, setHydrated] = useState(false);
@@ -141,9 +143,14 @@ export default function DriverDashboard() {
     <div className="min-h-screen bg-slate-900 text-slate-100 pb-16">
       <header className="border-b border-slate-800 sticky top-0 bg-slate-900/90 backdrop-blur z-10">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-lg font-bold text-white">Driver Earnings</h1>
-            <p className="text-xs text-slate-500">Uber & Lyft pacing tracker</p>
+          <div className="flex items-center gap-2">
+            <div>
+              <h1 className="text-lg font-bold text-white">Driver Earnings</h1>
+              <p className="text-xs text-slate-500">Uber & Lyft pacing tracker</p>
+            </div>
+            <Link href="/driver/help" title="Help & guide" className="text-slate-500 hover:text-sky-400 p-1">
+              <HelpCircle size={18} />
+            </Link>
           </div>
           <div className="flex items-center gap-2">
             {activeShift ? (
@@ -186,18 +193,32 @@ export default function DriverDashboard() {
         <DeficitBanner weekly={weekly} />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <PacingProgress result={weekly} title="This week" />
-          <PacingProgress result={monthly} title="This month" />
+          <PacingProgress
+            result={weekly}
+            title="This week"
+            tip="Net income earned this week vs your weekly goal. The thin white tick shows where you should be today to stay on pace. Green = ahead, amber = on track, red = behind."
+          />
+          <PacingProgress
+            result={monthly}
+            title="This month"
+            tip="Net income earned this calendar month vs your monthly goal. The thin white tick shows where you should be today to stay on pace."
+          />
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <StatCard label="Gross (month)" value={formatCurrency(monthSummary.gross)} icon={CircleDollarSign} />
+          <StatCard
+            label="Gross (month)"
+            value={formatCurrency(monthSummary.gross)}
+            icon={CircleDollarSign}
+            tip="Everything Uber and Lyft paid you this month — fares, tips, and bonuses combined — before any expenses come out."
+          />
           <StatCard
             label="Net (month)"
             value={formatCurrency(monthSummary.netIncome)}
             sub={`- ${formatCurrency(monthVariableExpenses + monthSummary.proratedFixedExpenses)} expenses`}
             icon={Wallet}
             accent={monthSummary.netIncome >= 0 ? 'text-emerald-400' : 'text-red-400'}
+            tip="What you actually keep: gross minus day-to-day expenses (gas, washes, meals) minus your recurring overhead prorated for the month so far."
           />
           <StatCard
             label="True net hourly"
@@ -205,6 +226,7 @@ export default function DriverDashboard() {
             sub={`${monthSummary.hours.toFixed(1)} hrs logged`}
             icon={Timer}
             accent="text-sky-400"
+            tip="Net income divided by hours logged — your real wage after expenses, not the gross rate the apps show you."
           />
           <StatCard
             label="$ / mile yield"
@@ -212,12 +234,14 @@ export default function DriverDashboard() {
             sub={`${formatMiles(monthSummary.miles)} · IRS offset ${formatCurrency(taxDeduction)}`}
             icon={Route}
             accent="text-sky-400"
+            tip="Gross earned per mile driven — higher is better for your car's wear. IRS offset is your estimated mileage tax deduction (miles × rate in Settings). It reduces taxable income; it isn't cash."
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm font-medium text-slate-300 mr-1 flex items-center gap-1.5">
             <FileText size={15} /> Statements
+            <InfoTip text="Generates a printable summary of the current week or month — earnings by platform, expense audit, tax offset, and per-day details. Tap Print / Save PDF inside to export it." />
           </span>
           <button
             onClick={() => setReportPeriod('week')}
@@ -236,7 +260,10 @@ export default function DriverDashboard() {
         <EarningsChart shifts={shifts} />
 
         <div>
-          <h2 className="text-sm font-medium text-slate-300 mb-2">Daily log</h2>
+          <h2 className="text-sm font-medium text-slate-300 mb-2 flex items-center gap-1.5">
+            Daily log
+            <InfoTip text="One row per day you worked. Tap the pencil to edit a day's earnings, hours, miles, or expenses; the trash icon deletes it. Ending a shift adds to the same day's row." />
+          </h2>
           <ShiftTable shifts={shifts} onEdit={setEditingShift} onDelete={handleDeleteShift} />
         </div>
 

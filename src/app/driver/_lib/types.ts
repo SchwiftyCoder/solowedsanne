@@ -6,10 +6,11 @@ export type PlatformTotals = {
   bonus: number;
   distanceMiles: number;
   trips: number;
+  hours: number;
 };
 
 export function emptyPlatformTotals(): PlatformTotals {
-  return { fare: 0, tips: 0, bonus: 0, distanceMiles: 0, trips: 0 };
+  return { fare: 0, tips: 0, bonus: 0, distanceMiles: 0, trips: 0, hours: 0 };
 }
 
 export type VariableExpenses = {

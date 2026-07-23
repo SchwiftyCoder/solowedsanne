@@ -50,14 +50,16 @@ export default function DriverHelpPage() {
           </p>
           <p>
             <strong className="text-white">Log day</strong> — Prefer entering totals at the end of the day? Tap{' '}
-            <em>Log day</em> and type in what Uber and Lyft paid you (earnings and tips), hours worked, and expenses.
-            Hours accept the <span className="text-slate-400">HH:MM</span> format — type <em>8:30</em> for eight and
-            a half hours (plain decimals like <em>8.5</em> also work). Miles are tracked from the odometer readings
-            you enter when starting and ending a shift.
+            <em>Log day</em> and type in each app&apos;s earnings, tips, and hours — Uber and Lyft each get their own
+            hours box, and the day&apos;s total is the sum. Hours accept the{' '}
+            <span className="text-slate-400">HH:MM</span> format — type <em>8:30</em> for eight and a half hours
+            (plain decimals like <em>8.5</em> also work). Miles are tracked from the odometer readings you enter when
+            starting and ending a shift.
           </p>
           <p>
-            <strong className="text-white">Editing</strong> — In the daily log, the pencil icon opens any day for
-            corrections and the trash icon deletes it.
+            <strong className="text-white">Editing</strong> — Tap any row in the daily log (or its pencil icon) to
+            open that day for corrections; the trash icon deletes it. When ending a timed shift, you pick which app
+            the hours belong to — or <em>Both</em> to split them evenly.
           </p>
         </Section>
 

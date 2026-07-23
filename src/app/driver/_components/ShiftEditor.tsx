@@ -42,7 +42,23 @@ export default function ShiftEditor({
   onClose: () => void;
 }) {
   const [draft, setDraft] = useState<Shift>(structuredClone(shift));
-  const [hoursText, setHoursText] = useState(shift.hours > 0 ? formatHoursClock(shift.hours) : '');
+  const [uberHoursText, setUberHoursText] = useState(shift.uber.hours > 0 ? formatHoursClock(shift.uber.hours) : '');
+  const [lyftHoursText, setLyftHoursText] = useState(shift.lyft.hours > 0 ? formatHoursClock(shift.lyft.hours) : '');
+
+  function hoursInput(value: string, onChange: (v: string) => void) {
+    return (
+      <label className="flex flex-col gap-1">
+        <span className="text-xs text-slate-500">Hours (HH:MM)</span>
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="e.g. 8:30"
+          className="rounded-lg bg-slate-900 border border-slate-600 px-3 py-2 text-sm text-white focus:outline-none focus:border-sky-500 placeholder:text-slate-600"
+        />
+      </label>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4">
@@ -69,28 +85,20 @@ export default function ShiftEditor({
             <p className="text-xs font-semibold text-cyan-400 uppercase tracking-wide">Uber</p>
             <NumberField label="Earnings" value={draft.uber.fare} onChange={(n) => setDraft({ ...draft, uber: { ...draft.uber, fare: n } })} />
             <NumberField label="Tips" value={draft.uber.tips} onChange={(n) => setDraft({ ...draft, uber: { ...draft.uber, tips: n } })} />
+            {hoursInput(uberHoursText, (v) => {
+              setUberHoursText(v);
+              setDraft({ ...draft, uber: { ...draft.uber, hours: parseHoursInput(v) } });
+            })}
           </div>
           <div className="space-y-3">
             <p className="text-xs font-semibold text-pink-400 uppercase tracking-wide">Lyft</p>
             <NumberField label="Earnings" value={draft.lyft.fare} onChange={(n) => setDraft({ ...draft, lyft: { ...draft.lyft, fare: n } })} />
             <NumberField label="Tips" value={draft.lyft.tips} onChange={(n) => setDraft({ ...draft, lyft: { ...draft.lyft, tips: n } })} />
+            {hoursInput(lyftHoursText, (v) => {
+              setLyftHoursText(v);
+              setDraft({ ...draft, lyft: { ...draft.lyft, hours: parseHoursInput(v) } });
+            })}
           </div>
-        </div>
-
-        <div className="mb-4">
-          <label className="flex flex-col gap-1">
-            <span className="text-xs text-slate-500">Hours worked (HH:MM)</span>
-            <input
-              type="text"
-              value={hoursText}
-              onChange={(e) => {
-                setHoursText(e.target.value);
-                setDraft({ ...draft, hours: parseHoursInput(e.target.value) });
-              }}
-              placeholder="e.g. 8:30"
-              className="rounded-lg bg-slate-900 border border-slate-600 px-3 py-2 text-sm text-white focus:outline-none focus:border-sky-500 placeholder:text-slate-600"
-            />
-          </label>
         </div>
 
         <div className="mb-6">
@@ -114,7 +122,7 @@ export default function ShiftEditor({
               Cancel
             </button>
             <button
-              onClick={() => onSave(draft)}
+              onClick={() => onSave({ ...draft, hours: (draft.uber.hours || 0) + (draft.lyft.hours || 0) })}
               className="text-sm px-4 py-2 rounded-lg bg-emerald-500 text-emerald-950 font-medium hover:bg-emerald-400"
             >
               Save

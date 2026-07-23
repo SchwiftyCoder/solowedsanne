@@ -3,7 +3,7 @@
 import { Pencil, Trash2 } from 'lucide-react';
 import { Shift } from '../_lib/types';
 import { shiftGross, shiftMiles, shiftVariableExpenseTotal } from '../_lib/calculations';
-import { formatCurrency, formatMiles, formatHours } from '../_lib/format';
+import { formatCurrency, formatMiles, formatHoursHM } from '../_lib/format';
 import { formatShortDate, formatWeekdayShort } from '../_lib/dates';
 
 export default function ShiftTable({
@@ -56,7 +56,7 @@ export default function ShiftTable({
               <span className="text-slate-500">Miles</span>
               <span className="text-right text-slate-300">{formatMiles(shiftMiles(s))}</span>
               <span className="text-slate-500">Hours</span>
-              <span className="text-right text-slate-300">{formatHours(s.hours)}</span>
+              <span className="text-right text-slate-300">{formatHoursHM(s.hours)}</span>
             </div>
           </div>
         ))}
@@ -87,7 +87,7 @@ export default function ShiftTable({
               <td className="px-4 py-3 text-white font-medium">{formatCurrency(shiftGross(s))}</td>
               <td className="px-4 py-3 text-slate-300">{formatCurrency(shiftVariableExpenseTotal(s))}</td>
               <td className="px-4 py-3 text-slate-300">{formatMiles(shiftMiles(s))}</td>
-              <td className="px-4 py-3 text-slate-300">{formatHours(s.hours)}</td>
+              <td className="px-4 py-3 text-slate-300">{formatHoursHM(s.hours)}</td>
               <td className="px-4 py-3">
                 <div className="flex items-center justify-end gap-1">
                   <button onClick={() => onEdit(s)} className="p-1.5 rounded-md hover:bg-slate-700 text-slate-300">

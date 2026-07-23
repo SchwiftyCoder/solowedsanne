@@ -3,7 +3,7 @@
 import { X, Printer } from 'lucide-react';
 import { PacingResult, summarizeShifts, mileageDeduction, shiftGross, shiftMiles, shiftVariableExpenseTotal } from '../_lib/calculations';
 import { FixedExpense, Settings } from '../_lib/types';
-import { formatCurrency, formatHours, formatMiles } from '../_lib/format';
+import { formatCurrency, formatHoursHM, formatMiles } from '../_lib/format';
 import { formatShortDate, formatWeekdayShort } from '../_lib/dates';
 
 export default function ReportModal({
@@ -77,7 +77,7 @@ export default function ReportModal({
                 <p className="text-base font-semibold text-sky-400">
                   {summary.hours > 0 ? `${formatCurrency(summary.netHourlyRate)}/hr` : '—'}
                 </p>
-                <p className="text-xs text-slate-500">{formatHours(summary.hours)} logged</p>
+                <p className="text-xs text-slate-500">{formatHoursHM(summary.hours)} logged</p>
               </div>
               <div>
                 <p className="text-xs text-slate-500 uppercase tracking-wide">Miles / yield</p>

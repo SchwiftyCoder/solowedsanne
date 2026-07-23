@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { X, Trash2 } from 'lucide-react';
 import { Shift } from '../_lib/types';
+import { formatHoursClock, parseHoursInput } from '../_lib/format';
 
 function NumberField({
   label,
@@ -41,6 +42,7 @@ export default function ShiftEditor({
   onClose: () => void;
 }) {
   const [draft, setDraft] = useState<Shift>(structuredClone(shift));
+  const [hoursText, setHoursText] = useState(shift.hours > 0 ? formatHoursClock(shift.hours) : '');
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4">
@@ -67,23 +69,28 @@ export default function ShiftEditor({
             <p className="text-xs font-semibold text-cyan-400 uppercase tracking-wide">Uber</p>
             <NumberField label="Fare" value={draft.uber.fare} onChange={(n) => setDraft({ ...draft, uber: { ...draft.uber, fare: n } })} />
             <NumberField label="Tips" value={draft.uber.tips} onChange={(n) => setDraft({ ...draft, uber: { ...draft.uber, tips: n } })} />
-            <NumberField label="Surge/Bonus" value={draft.uber.bonus} onChange={(n) => setDraft({ ...draft, uber: { ...draft.uber, bonus: n } })} />
           </div>
           <div className="space-y-3">
             <p className="text-xs font-semibold text-pink-400 uppercase tracking-wide">Lyft</p>
             <NumberField label="Fare" value={draft.lyft.fare} onChange={(n) => setDraft({ ...draft, lyft: { ...draft.lyft, fare: n } })} />
             <NumberField label="Tips" value={draft.lyft.tips} onChange={(n) => setDraft({ ...draft, lyft: { ...draft.lyft, tips: n } })} />
-            <NumberField label="Surge/Bonus" value={draft.lyft.bonus} onChange={(n) => setDraft({ ...draft, lyft: { ...draft.lyft, bonus: n } })} />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4 mb-4">
-          <NumberField
-            label="Miles driven"
-            value={draft.odometerMiles ?? 0}
-            onChange={(n) => setDraft({ ...draft, odometerMiles: n })}
-          />
-          <NumberField label="Hours worked" value={draft.hours} onChange={(n) => setDraft({ ...draft, hours: n })} />
+          <label className="flex flex-col gap-1">
+            <span className="text-xs text-slate-500">Hours worked (HH:MM)</span>
+            <input
+              type="text"
+              value={hoursText}
+              onChange={(e) => {
+                setHoursText(e.target.value);
+                setDraft({ ...draft, hours: parseHoursInput(e.target.value) });
+              }}
+              placeholder="e.g. 8:30"
+              className="rounded-lg bg-slate-900 border border-slate-600 px-3 py-2 text-sm text-white focus:outline-none focus:border-sky-500 placeholder:text-slate-600"
+            />
+          </label>
         </div>
 
         <div className="mb-6">

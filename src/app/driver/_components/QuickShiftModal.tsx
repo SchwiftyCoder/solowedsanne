@@ -5,6 +5,8 @@ import { X, Play, Square } from 'lucide-react';
 import { ActiveShift } from '../_lib/types';
 import { formatHoursClock, parseHoursInput } from '../_lib/format';
 
+export type ShiftPlatform = 'uber' | 'lyft' | 'both';
+
 function Field({
   label,
   value,
@@ -71,10 +73,11 @@ export function EndShiftModal({
   onClose,
 }: {
   active: ActiveShift;
-  onEnd: (data: { hours: number; miles: number | null; fuel: number; misc: number }) => void;
+  onEnd: (data: { hours: number; miles: number | null; fuel: number; misc: number; platform: ShiftPlatform }) => void;
   onDiscard: () => void;
   onClose: () => void;
 }) {
+  const [platform, setPlatform] = useState<ShiftPlatform>('both');
   const [endOdometer, setEndOdometer] = useState('');
   const [fuel, setFuel] = useState('');
   const [misc, setMisc] = useState('');
@@ -101,6 +104,30 @@ export function EndShiftModal({
         </p>
 
         <div className="space-y-3">
+          <div>
+            <span className="text-xs text-slate-400 block mb-1.5">Which app were you driving?</span>
+            <div className="grid grid-cols-3 gap-2">
+              {([
+                ['uber', 'Uber', 'bg-cyan-500 text-cyan-950 border-cyan-500'],
+                ['lyft', 'Lyft', 'bg-pink-500 text-pink-950 border-pink-500'],
+                ['both', 'Both', 'bg-slate-200 text-slate-900 border-slate-200'],
+              ] as const).map(([value, label, activeCls]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setPlatform(value)}
+                  className={`text-sm py-2 rounded-lg border font-medium transition-colors ${
+                    platform === value ? activeCls : 'border-slate-600 text-slate-300 hover:bg-slate-700'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            {platform === 'both' && (
+              <p className="text-[11px] text-slate-500 mt-1">Hours will be split evenly between Uber and Lyft.</p>
+            )}
+          </div>
           <Field
             label={startOdo != null ? 'End odometer' : 'End odometer (no start reading logged)'}
             value={endOdometer}
@@ -122,6 +149,7 @@ export function EndShiftModal({
               miles,
               fuel: parseFloat(fuel) || 0,
               misc: parseFloat(misc) || 0,
+              platform,
             })
           }
           className="mt-5 w-full flex items-center justify-center gap-2 rounded-lg bg-emerald-500 text-emerald-950 font-semibold py-3 hover:bg-emerald-400"

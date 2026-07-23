@@ -18,7 +18,7 @@ import ShiftTable from './_components/ShiftTable';
 import ShiftEditor from './_components/ShiftEditor';
 import FixedExpensesPanel from './_components/FixedExpensesPanel';
 import SettingsPanel from './_components/SettingsPanel';
-import { StartShiftModal, EndShiftModal } from './_components/QuickShiftModal';
+import { StartShiftModal, EndShiftModal, ShiftPlatform } from './_components/QuickShiftModal';
 import ReportModal from './_components/ReportModal';
 import InfoTip from './_components/InfoTip';
 
@@ -99,8 +99,10 @@ export default function DriverDashboard() {
     setShowStartModal(false);
   }
 
-  function endShift(data: { hours: number; miles: number | null; fuel: number; misc: number }) {
+  function endShift(data: { hours: number; miles: number | null; fuel: number; misc: number; platform: ShiftPlatform }) {
     const dateKey = toDateKey(new Date());
+    const uberHours = data.platform === 'uber' ? data.hours : data.platform === 'both' ? data.hours / 2 : 0;
+    const lyftHours = data.platform === 'lyft' ? data.hours : data.platform === 'both' ? data.hours / 2 : 0;
     setShifts((prev) => {
       const existing = prev.find((s) => s.date === dateKey);
       if (existing) {
@@ -109,6 +111,8 @@ export default function DriverDashboard() {
             ? {
                 ...s,
                 hours: s.hours + data.hours,
+                uber: { ...s.uber, hours: s.uber.hours + uberHours },
+                lyft: { ...s.lyft, hours: s.lyft.hours + lyftHours },
                 odometerMiles: data.miles != null ? (s.odometerMiles ?? 0) + data.miles : s.odometerMiles,
                 expenses: {
                   ...s.expenses,
@@ -124,6 +128,8 @@ export default function DriverDashboard() {
         {
           ...fresh,
           hours: data.hours,
+          uber: { ...fresh.uber, hours: uberHours },
+          lyft: { ...fresh.lyft, hours: lyftHours },
           odometerMiles: data.miles,
           expenses: { ...fresh.expenses, gas: data.fuel, other: data.misc },
         },

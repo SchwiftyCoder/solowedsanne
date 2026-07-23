@@ -21,7 +21,18 @@ function write<T>(key: string, value: T) {
 }
 
 export function loadShifts(): Shift[] {
-  return read<Shift[]>(SHIFTS_KEY, []);
+  const stored = read<Shift[]>(SHIFTS_KEY, []);
+  // migrate shifts saved before per-platform hours: park the old day total on Uber
+  return stored.map((s) => {
+    const uberHours = s.uber.hours ?? 0;
+    const lyftHours = s.lyft.hours ?? 0;
+    const legacyTotal = uberHours === 0 && lyftHours === 0 && s.hours > 0 ? s.hours : null;
+    return {
+      ...s,
+      uber: { ...s.uber, hours: legacyTotal ?? uberHours },
+      lyft: { ...s.lyft, hours: lyftHours },
+    };
+  });
 }
 
 export function saveShifts(shifts: Shift[]) {

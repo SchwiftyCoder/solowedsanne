@@ -30,16 +30,22 @@ export default function ShiftTable({
       {/* Mobile: card list */}
       <div className="sm:hidden divide-y divide-slate-700">
         {sorted.map((s) => (
-          <div key={s.id} className="p-4">
+          <div key={s.id} className="p-4 cursor-pointer active:bg-slate-700/30" onClick={() => onEdit(s)}>
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-semibold text-white">
                 {formatWeekdayShort(s.date)} {formatShortDate(s.date)}
               </span>
               <div className="flex items-center gap-1">
-                <button onClick={() => onEdit(s)} className="p-1.5 rounded-md hover:bg-slate-700 text-slate-300">
+                <button
+                  onClick={(e) => { e.stopPropagation(); onEdit(s); }}
+                  className="p-1.5 rounded-md hover:bg-slate-700 text-slate-300"
+                >
                   <Pencil size={15} />
                 </button>
-                <button onClick={() => onDelete(s.id)} className="p-1.5 rounded-md hover:bg-slate-700 text-red-400">
+                <button
+                  onClick={(e) => { e.stopPropagation(); onDelete(s.id); }}
+                  className="p-1.5 rounded-md hover:bg-slate-700 text-red-400"
+                >
                   <Trash2 size={15} />
                 </button>
               </div>
@@ -78,7 +84,7 @@ export default function ShiftTable({
         </thead>
         <tbody className="divide-y divide-slate-700">
           {sorted.map((s) => (
-            <tr key={s.id} className="hover:bg-slate-700/30">
+            <tr key={s.id} className="hover:bg-slate-700/30 cursor-pointer" onClick={() => onEdit(s)}>
               <td className="px-4 py-3 text-slate-200 whitespace-nowrap">
                 {formatWeekdayShort(s.date)} {formatShortDate(s.date)}
               </td>
@@ -90,10 +96,16 @@ export default function ShiftTable({
               <td className="px-4 py-3 text-slate-300">{formatHoursHM(s.hours)}</td>
               <td className="px-4 py-3">
                 <div className="flex items-center justify-end gap-1">
-                  <button onClick={() => onEdit(s)} className="p-1.5 rounded-md hover:bg-slate-700 text-slate-300">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onEdit(s); }}
+                    className="p-1.5 rounded-md hover:bg-slate-700 text-slate-300"
+                  >
                     <Pencil size={15} />
                   </button>
-                  <button onClick={() => onDelete(s.id)} className="p-1.5 rounded-md hover:bg-slate-700 text-red-400">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onDelete(s.id); }}
+                    className="p-1.5 rounded-md hover:bg-slate-700 text-red-400"
+                  >
                     <Trash2 size={15} />
                   </button>
                 </div>

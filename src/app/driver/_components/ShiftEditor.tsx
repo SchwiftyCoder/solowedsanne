@@ -67,17 +67,17 @@ export default function ShiftEditor({
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="space-y-3">
             <p className="text-xs font-semibold text-cyan-400 uppercase tracking-wide">Uber</p>
-            <NumberField label="Fare" value={draft.uber.fare} onChange={(n) => setDraft({ ...draft, uber: { ...draft.uber, fare: n } })} />
+            <NumberField label="Earnings" value={draft.uber.fare} onChange={(n) => setDraft({ ...draft, uber: { ...draft.uber, fare: n } })} />
             <NumberField label="Tips" value={draft.uber.tips} onChange={(n) => setDraft({ ...draft, uber: { ...draft.uber, tips: n } })} />
           </div>
           <div className="space-y-3">
             <p className="text-xs font-semibold text-pink-400 uppercase tracking-wide">Lyft</p>
-            <NumberField label="Fare" value={draft.lyft.fare} onChange={(n) => setDraft({ ...draft, lyft: { ...draft.lyft, fare: n } })} />
+            <NumberField label="Earnings" value={draft.lyft.fare} onChange={(n) => setDraft({ ...draft, lyft: { ...draft.lyft, fare: n } })} />
             <NumberField label="Tips" value={draft.lyft.tips} onChange={(n) => setDraft({ ...draft, lyft: { ...draft.lyft, tips: n } })} />
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="mb-4">
           <label className="flex flex-col gap-1">
             <span className="text-xs text-slate-500">Hours worked (HH:MM)</span>
             <input
@@ -97,7 +97,6 @@ export default function ShiftEditor({
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Variable expenses</p>
           <div className="grid grid-cols-2 gap-4">
             <NumberField label="Gas" value={draft.expenses.gas} onChange={(n) => setDraft({ ...draft, expenses: { ...draft.expenses, gas: n } })} />
-            <NumberField label="Car wash" value={draft.expenses.carWash} onChange={(n) => setDraft({ ...draft, expenses: { ...draft.expenses, carWash: n } })} />
             <NumberField label="Meals" value={draft.expenses.meals} onChange={(n) => setDraft({ ...draft, expenses: { ...draft.expenses, meals: n } })} />
             <NumberField label="Other" value={draft.expenses.other} onChange={(n) => setDraft({ ...draft, expenses: { ...draft.expenses, other: n } })} />
           </div>

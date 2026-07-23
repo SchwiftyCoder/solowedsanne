@@ -83,8 +83,9 @@ export default function ShiftEditor({
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="space-y-3">
             <p className="text-xs font-semibold text-cyan-400 uppercase tracking-wide">Uber</p>
-            <NumberField label="Earnings" value={draft.uber.fare} onChange={(n) => setDraft({ ...draft, uber: { ...draft.uber, fare: n } })} />
+            <NumberField label="Fare" value={draft.uber.fare} onChange={(n) => setDraft({ ...draft, uber: { ...draft.uber, fare: n } })} />
             <NumberField label="Tips" value={draft.uber.tips} onChange={(n) => setDraft({ ...draft, uber: { ...draft.uber, tips: n } })} />
+            <NumberField label="Trips" step="1" value={draft.uber.trips} onChange={(n) => setDraft({ ...draft, uber: { ...draft.uber, trips: Math.max(Math.round(n), 0) } })} />
             {hoursInput(uberHoursText, (v) => {
               setUberHoursText(v);
               setDraft({ ...draft, uber: { ...draft.uber, hours: parseHoursInput(v) } });
@@ -92,8 +93,9 @@ export default function ShiftEditor({
           </div>
           <div className="space-y-3">
             <p className="text-xs font-semibold text-pink-400 uppercase tracking-wide">Lyft</p>
-            <NumberField label="Earnings" value={draft.lyft.fare} onChange={(n) => setDraft({ ...draft, lyft: { ...draft.lyft, fare: n } })} />
+            <NumberField label="Fare" value={draft.lyft.fare} onChange={(n) => setDraft({ ...draft, lyft: { ...draft.lyft, fare: n } })} />
             <NumberField label="Tips" value={draft.lyft.tips} onChange={(n) => setDraft({ ...draft, lyft: { ...draft.lyft, tips: n } })} />
+            <NumberField label="Trips" step="1" value={draft.lyft.trips} onChange={(n) => setDraft({ ...draft, lyft: { ...draft.lyft, trips: Math.max(Math.round(n), 0) } })} />
             {hoursInput(lyftHoursText, (v) => {
               setLyftHoursText(v);
               setDraft({ ...draft, lyft: { ...draft.lyft, hours: parseHoursInput(v) } });

@@ -3,25 +3,28 @@
 import { useState } from 'react';
 import { X, Play, Square } from 'lucide-react';
 import { ActiveShift } from '../_lib/types';
+import { formatHoursClock, parseHoursInput } from '../_lib/format';
 
 function Field({
   label,
   value,
   onChange,
   placeholder,
+  text = false,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
+  text?: boolean;
 }) {
   return (
     <label className="flex flex-col gap-1">
       <span className="text-xs text-slate-400">{label}</span>
       <input
-        type="number"
-        inputMode="decimal"
-        step="0.01"
+        type={text ? 'text' : 'number'}
+        inputMode={text ? undefined : 'decimal'}
+        step={text ? undefined : '0.01'}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
@@ -76,7 +79,7 @@ export function EndShiftModal({
   const [fuel, setFuel] = useState('');
   const [misc, setMisc] = useState('');
   const [hours, setHours] = useState(() =>
-    Math.max((Date.now() - active.startedAt) / 3600000, 0).toFixed(1)
+    formatHoursClock((Date.now() - active.startedAt) / 3600000)
   );
 
   const startOdo = active.startOdometer;
@@ -109,13 +112,13 @@ export function EndShiftModal({
             <Field label="Fuel cost ($)" value={fuel} onChange={setFuel} placeholder="0.00" />
             <Field label="Misc expenses ($)" value={misc} onChange={setMisc} placeholder="0.00" />
           </div>
-          <Field label="Hours (auto from timer)" value={hours} onChange={setHours} />
+          <Field label="Hours — HH:MM, auto from timer" value={hours} onChange={setHours} placeholder="e.g. 8:30" text />
         </div>
 
         <button
           onClick={() =>
             onEnd({
-              hours: parseFloat(hours) || 0,
+              hours: parseHoursInput(hours),
               miles,
               fuel: parseFloat(fuel) || 0,
               misc: parseFloat(misc) || 0,

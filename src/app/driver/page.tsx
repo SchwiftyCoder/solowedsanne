@@ -8,7 +8,7 @@ import { ActiveShift, DEFAULT_SETTINGS, FixedExpense, Settings, Shift } from './
 import { computePacing, mileageDeduction, shiftVariableExpenseTotal, summarizeShifts } from './_lib/calculations';
 import { createEmptyShift } from './_lib/shifts';
 import { toDateKey } from './_lib/dates';
-import { formatCurrency, formatMiles } from './_lib/format';
+import { formatCurrency, formatHoursHM, formatMiles } from './_lib/format';
 
 import DeficitBanner from './_components/DeficitBanner';
 import PacingProgress from './_components/PacingProgress';
@@ -87,7 +87,9 @@ export default function DriverDashboard() {
   }
 
   function addManualShift() {
-    setEditingShift(createEmptyShift(toDateKey(today)));
+    const key = toDateKey(new Date());
+    const existing = shifts.find((s) => s.date === key);
+    setEditingShift(existing ?? createEmptyShift(key));
   }
 
   function startShift(startOdometer: number | null) {
@@ -223,7 +225,7 @@ export default function DriverDashboard() {
           <StatCard
             label="True net hourly"
             value={monthSummary.hours > 0 ? `${formatCurrency(monthSummary.netHourlyRate)}/hr` : '—'}
-            sub={`${monthSummary.hours.toFixed(1)} hrs logged`}
+            sub={`${formatHoursHM(monthSummary.hours)} logged`}
             icon={Timer}
             accent="text-sky-400"
             tip="Net income divided by hours logged — your real wage after expenses, not the gross rate the apps show you."

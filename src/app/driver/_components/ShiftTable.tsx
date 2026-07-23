@@ -2,8 +2,8 @@
 
 import { Pencil, Trash2 } from 'lucide-react';
 import { Shift } from '../_lib/types';
-import { shiftGross, shiftMiles, shiftVariableExpenseTotal } from '../_lib/calculations';
-import { formatCurrency, formatMiles, formatHoursHM } from '../_lib/format';
+import { shiftGross, shiftVariableExpenseTotal } from '../_lib/calculations';
+import { formatCurrency, formatHoursHM } from '../_lib/format';
 import { formatShortDate, formatWeekdayShort } from '../_lib/dates';
 
 export default function ShiftTable({
@@ -59,10 +59,12 @@ export default function ShiftTable({
               <span className="text-right text-white font-medium">{formatCurrency(shiftGross(s))}</span>
               <span className="text-slate-500">Expenses</span>
               <span className="text-right text-slate-300">{formatCurrency(shiftVariableExpenseTotal(s))}</span>
-              <span className="text-slate-500">Miles</span>
-              <span className="text-right text-slate-300">{formatMiles(shiftMiles(s))}</span>
               <span className="text-slate-500">Hours</span>
               <span className="text-right text-slate-300">{formatHoursHM(s.hours)}</span>
+              <span className="text-slate-500">Hourly</span>
+              <span className="text-right text-sky-300 font-medium">
+                {s.hours > 0 ? `${formatCurrency(shiftGross(s) / s.hours)}/hr` : '—'}
+              </span>
             </div>
           </div>
         ))}
@@ -77,8 +79,8 @@ export default function ShiftTable({
             <th className="px-4 py-3 font-medium">Lyft</th>
             <th className="px-4 py-3 font-medium">Gross</th>
             <th className="px-4 py-3 font-medium">Expenses</th>
-            <th className="px-4 py-3 font-medium">Miles</th>
             <th className="px-4 py-3 font-medium">Hours</th>
+            <th className="px-4 py-3 font-medium">Hourly</th>
             <th className="px-4 py-3 font-medium text-right">Actions</th>
           </tr>
         </thead>
@@ -92,8 +94,10 @@ export default function ShiftTable({
               <td className="px-4 py-3 text-pink-300">{formatCurrency(s.lyft.fare + s.lyft.tips + s.lyft.bonus)}</td>
               <td className="px-4 py-3 text-white font-medium">{formatCurrency(shiftGross(s))}</td>
               <td className="px-4 py-3 text-slate-300">{formatCurrency(shiftVariableExpenseTotal(s))}</td>
-              <td className="px-4 py-3 text-slate-300">{formatMiles(shiftMiles(s))}</td>
               <td className="px-4 py-3 text-slate-300">{formatHoursHM(s.hours)}</td>
+              <td className="px-4 py-3 text-sky-300 font-medium">
+                {s.hours > 0 ? `${formatCurrency(shiftGross(s) / s.hours)}/hr` : '—'}
+              </td>
               <td className="px-4 py-3">
                 <div className="flex items-center justify-end gap-1">
                   <button

@@ -1,6 +1,7 @@
 'use client';
 
 import { Settings } from '../_lib/types';
+import InfoTip from './InfoTip';
 
 export default function SettingsPanel({
   settings,
@@ -11,7 +12,10 @@ export default function SettingsPanel({
 }) {
   return (
     <div className="rounded-xl bg-slate-800 border border-slate-700 p-4 sm:p-5">
-      <h3 className="text-sm font-medium text-slate-300 mb-3">Goals & settings</h3>
+      <h3 className="text-sm font-medium text-slate-300 mb-3 flex items-center gap-1.5">
+        Goals & settings
+        <InfoTip text="Weekly and monthly income targets drive the pacing bars and deficit alerts. The IRS mileage rate is used to estimate your tax deduction — update it when the IRS changes the standard rate." />
+      </h3>
       <div className="grid grid-cols-2 gap-4">
         <label className="flex flex-col gap-1">
           <span className="text-xs text-slate-500">Weekly goal</span>

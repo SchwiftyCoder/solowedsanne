@@ -2,6 +2,7 @@
 
 import { PacingResult } from '../_lib/calculations';
 import { formatCurrencyCompact } from '../_lib/format';
+import InfoTip from './InfoTip';
 
 const STATUS_LABEL: Record<PacingResult['status'], string> = {
   ahead: 'Ahead of Pace',
@@ -21,13 +22,16 @@ const BAR_COLOR: Record<PacingResult['status'], string> = {
   behind: 'bg-red-500',
 };
 
-export default function PacingProgress({ result, title }: { result: PacingResult; title: string }) {
+export default function PacingProgress({ result, title, tip }: { result: PacingResult; title: string; tip?: string }) {
   const barPct = Math.min(result.progressPct, 100);
 
   return (
     <div className="rounded-xl bg-slate-800 border border-slate-700 p-4 sm:p-5">
       <div className="flex items-center justify-between gap-2 flex-wrap">
-        <h3 className="text-sm font-medium text-slate-300">{title}</h3>
+        <h3 className="text-sm font-medium text-slate-300 flex items-center gap-1.5">
+          {title}
+          {tip && <InfoTip text={tip} />}
+        </h3>
         <span className={`text-xs font-semibold px-2 py-1 rounded-full ${STATUS_COLOR[result.status]}`}>
           {STATUS_LABEL[result.status]}
         </span>

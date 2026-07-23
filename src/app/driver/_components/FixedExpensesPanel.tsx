@@ -5,6 +5,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { ExpenseCadence, FixedExpense } from '../_lib/types';
 import { formatCurrency } from '../_lib/format';
 import { fixedExpensesWeeklyTotal } from '../_lib/calculations';
+import InfoTip from './InfoTip';
 
 export default function FixedExpensesPanel({
   expenses,
@@ -33,7 +34,10 @@ export default function FixedExpensesPanel({
   return (
     <div className="rounded-xl bg-slate-800 border border-slate-700 p-4 sm:p-5">
       <div className="flex items-center justify-between mb-1">
-        <h3 className="text-sm font-medium text-slate-300">Recurring overhead</h3>
+        <h3 className="text-sm font-medium text-slate-300 flex items-center gap-1.5">
+          Recurring overhead
+          <InfoTip text="Costs you pay whether or not you drive — insurance, car payment, phone, weekly fuel budget. Monthly amounts are converted to weekly (×12 ÷ 52), then spread across all 7 days and subtracted from your net income." />
+        </h3>
         <span className="text-sm text-slate-400">≈ {formatCurrency(fixedExpensesWeeklyTotal(expenses))}/wk</span>
       </div>
       <p className="text-xs text-slate-500 mb-3">

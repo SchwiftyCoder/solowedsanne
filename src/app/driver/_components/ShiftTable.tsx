@@ -1,10 +1,15 @@
 'use client';
 
 import { Pencil, Trash2 } from 'lucide-react';
-import { Shift } from '../_lib/types';
+import { PlatformTotals, Shift } from '../_lib/types';
 import { shiftGross, shiftVariableExpenseTotal } from '../_lib/calculations';
 import { formatCurrency, formatHoursHM } from '../_lib/format';
 import { formatShortDate, formatWeekdayShort } from '../_lib/dates';
+
+function platformRate(p: PlatformTotals): string | null {
+  if (!p.hours) return null;
+  return `${formatCurrency((p.fare + p.tips + p.bonus) / p.hours)}/hr`;
+}
 
 export default function ShiftTable({
   shifts,
@@ -52,16 +57,22 @@ export default function ShiftTable({
             </div>
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
               <span className="text-slate-500">Uber</span>
-              <span className="text-right text-cyan-300">{formatCurrency(s.uber.fare + s.uber.tips + s.uber.bonus)}</span>
+              <span className="text-right text-cyan-300">
+                {formatCurrency(s.uber.fare + s.uber.tips + s.uber.bonus)}
+                {platformRate(s.uber) && <span className="text-cyan-300/60 text-xs"> · {platformRate(s.uber)}</span>}
+              </span>
               <span className="text-slate-500">Lyft</span>
-              <span className="text-right text-pink-300">{formatCurrency(s.lyft.fare + s.lyft.tips + s.lyft.bonus)}</span>
+              <span className="text-right text-pink-300">
+                {formatCurrency(s.lyft.fare + s.lyft.tips + s.lyft.bonus)}
+                {platformRate(s.lyft) && <span className="text-pink-300/60 text-xs"> · {platformRate(s.lyft)}</span>}
+              </span>
               <span className="text-slate-500">Gross</span>
               <span className="text-right text-white font-medium">{formatCurrency(shiftGross(s))}</span>
               <span className="text-slate-500">Expenses</span>
               <span className="text-right text-slate-300">{formatCurrency(shiftVariableExpenseTotal(s))}</span>
               <span className="text-slate-500">Hours</span>
               <span className="text-right text-slate-300">{formatHoursHM(s.hours)}</span>
-              <span className="text-slate-500">Hourly</span>
+              <span className="text-slate-500">Avg hourly</span>
               <span className="text-right text-sky-300 font-medium">
                 {s.hours > 0 ? `${formatCurrency(shiftGross(s) / s.hours)}/hr` : '—'}
               </span>
@@ -80,7 +91,7 @@ export default function ShiftTable({
             <th className="px-4 py-3 font-medium">Gross</th>
             <th className="px-4 py-3 font-medium">Expenses</th>
             <th className="px-4 py-3 font-medium">Hours</th>
-            <th className="px-4 py-3 font-medium">Hourly</th>
+            <th className="px-4 py-3 font-medium">Avg hourly</th>
             <th className="px-4 py-3 font-medium text-right">Actions</th>
           </tr>
         </thead>
@@ -90,8 +101,14 @@ export default function ShiftTable({
               <td className="px-4 py-3 text-slate-200 whitespace-nowrap">
                 {formatWeekdayShort(s.date)} {formatShortDate(s.date)}
               </td>
-              <td className="px-4 py-3 text-cyan-300">{formatCurrency(s.uber.fare + s.uber.tips + s.uber.bonus)}</td>
-              <td className="px-4 py-3 text-pink-300">{formatCurrency(s.lyft.fare + s.lyft.tips + s.lyft.bonus)}</td>
+              <td className="px-4 py-3 text-cyan-300">
+                {formatCurrency(s.uber.fare + s.uber.tips + s.uber.bonus)}
+                {platformRate(s.uber) && <div className="text-xs text-cyan-300/60">{platformRate(s.uber)}</div>}
+              </td>
+              <td className="px-4 py-3 text-pink-300">
+                {formatCurrency(s.lyft.fare + s.lyft.tips + s.lyft.bonus)}
+                {platformRate(s.lyft) && <div className="text-xs text-pink-300/60">{platformRate(s.lyft)}</div>}
+              </td>
               <td className="px-4 py-3 text-white font-medium">{formatCurrency(shiftGross(s))}</td>
               <td className="px-4 py-3 text-slate-300">{formatCurrency(shiftVariableExpenseTotal(s))}</td>
               <td className="px-4 py-3 text-slate-300">{formatHoursHM(s.hours)}</td>

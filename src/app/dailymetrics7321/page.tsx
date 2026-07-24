@@ -204,12 +204,12 @@ export default function DriverDashboard() {
           <PacingProgress
             result={weekly}
             title="This week"
-            tip="Net income earned this week vs your weekly goal. The thin white tick shows where you should be today to stay on pace. Green = ahead, amber = on track, red = behind."
+            tip="Net income (not gross) earned this week vs your weekly goal — gross minus expenses and prorated overhead. The thin white tick shows where you should be today to stay on pace. Green = ahead, amber = on track, red = behind."
           />
           <PacingProgress
             result={monthly}
             title="This month"
-            tip="Net income earned this calendar month vs your monthly goal. The thin white tick shows where you should be today to stay on pace."
+            tip="Net income (not gross) earned this calendar month vs your monthly goal — includes every day this week too, since the week sits inside the month. Not additive with the weekly goal."
           />
         </div>
 

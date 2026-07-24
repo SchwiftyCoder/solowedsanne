@@ -66,9 +66,17 @@ export default function DriverHelpPage() {
         <Section title="Pacing bars & deficit alerts">
           <p>
             The <strong className="text-white">This week</strong> and <strong className="text-white">This month</strong>{' '}
-            bars compare your net income so far against your goals. The thin white tick marks where you should be{' '}
-            <em>today</em> if you earned evenly every day. Status badges: green <em>Ahead of Pace</em>, amber{' '}
-            <em>On Track</em>, red <em>Behind Target</em>.
+            bars compare your <strong className="text-white">net</strong> income so far against your goals — gross
+            fares and tips minus day expenses and prorated overhead, not the raw total the apps show you. The thin
+            white tick marks where you should be <em>today</em> if you earned evenly every day. Status badges: green{' '}
+            <em>Ahead of Pace</em>, amber <em>On Track</em>, red <em>Behind Target</em>. Below the bar, a line spells
+            out exactly how many dollars are left to hit that goal (or how far over you are once you&apos;ve passed it).
+          </p>
+          <p className="text-slate-400">
+            Week and month goals are <strong className="text-slate-300">not additive</strong> — a week sits inside its
+            month, so the same dollars count toward both. If you&apos;re $700 short for the week, you&apos;re not also
+            $700 short for the month on top of that; check each card&apos;s own &quot;left to reach this goal&quot; line
+            separately.
           </p>
           <p>
             When you fall behind for the week, a red alert appears showing three numbers:

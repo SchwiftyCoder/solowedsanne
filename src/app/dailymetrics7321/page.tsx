@@ -156,7 +156,7 @@ export default function DriverDashboard() {
               <h1 className="text-lg font-bold text-white">Driver Earnings</h1>
               <p className="text-xs text-slate-500">Uber & Lyft pacing tracker</p>
             </div>
-            <Link href="/driver/help" title="Help & guide" className="text-slate-500 hover:text-sky-400 p-1">
+            <Link href="/dailymetrics7321/help" title="Help & guide" className="text-slate-500 hover:text-sky-400 p-1">
               <HelpCircle size={18} />
             </Link>
           </div>

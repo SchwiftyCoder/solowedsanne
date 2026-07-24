@@ -2,28 +2,28 @@
   "name": "Driver Earnings",
   "short_name": "Earnings",
   "description": "Track Uber & Lyft earnings, overhead, and pacing toward weekly and monthly goals.",
-  "id": "/driver",
-  "start_url": "/driver",
-  "scope": "/driver",
+  "id": "/dailymetrics7321",
+  "start_url": "/dailymetrics7321",
+  "scope": "/dailymetrics7321",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
   "icons": [
     {
-      "src": "/driver/icon-192.png",
+      "src": "/dailymetrics7321/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/driver/icon-512.png",
+      "src": "/dailymetrics7321/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/driver/icon-512-maskable.png",
+      "src": "/dailymetrics7321/icon-512-maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

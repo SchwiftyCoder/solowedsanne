@@ -3,10 +3,10 @@ import type { Metadata, Viewport } from 'next';
 export const metadata: Metadata = {
   title: 'Driver Earnings',
   description: 'Track Uber & Lyft earnings, overhead, and pacing toward your weekly and monthly goals.',
-  manifest: '/driver/manifest.webmanifest',
+  manifest: '/dailymetrics7321/manifest.webmanifest',
   icons: {
-    icon: '/driver/icon-192.png',
-    apple: '/driver/apple-icon.png',
+    icon: '/dailymetrics7321/icon-192.png',
+    apple: '/dailymetrics7321/apple-icon.png',
   },
   appleWebApp: {
     capable: true,

@@ -1,7 +1,7 @@
 'use client';
 
 import { PacingResult } from '../_lib/calculations';
-import { formatCurrencyCompact } from '../_lib/format';
+import { formatCurrency, formatCurrencyCompact } from '../_lib/format';
 import InfoTip from './InfoTip';
 
 const STATUS_LABEL: Record<PacingResult['status'], string> = {
@@ -24,6 +24,7 @@ const BAR_COLOR: Record<PacingResult['status'], string> = {
 
 export default function PacingProgress({ result, title, tip }: { result: PacingResult; title: string; tip?: string }) {
   const barPct = Math.min(result.progressPct, 100);
+  const remaining = result.goal - result.earned;
 
   return (
     <div className="rounded-xl bg-slate-800 border border-slate-700 p-4 sm:p-5">
@@ -62,6 +63,14 @@ export default function PacingProgress({ result, title, tip }: { result: PacingR
         </span>
         <span>{result.progressPct.toFixed(0)}% of goal</span>
       </div>
+
+      <p className="mt-2 text-sm font-medium">
+        {remaining > 0 ? (
+          <span className="text-slate-300">{formatCurrency(remaining)} left to reach this goal</span>
+        ) : (
+          <span className="text-emerald-400">Goal reached — {formatCurrency(-remaining)} over</span>
+        )}
+      </p>
     </div>
   );
 }

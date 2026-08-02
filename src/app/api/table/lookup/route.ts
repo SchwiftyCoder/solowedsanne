@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceClient } from '@/lib/supabase';
+import { db, type Seating } from '@/lib/db';
 
 function normalizePhone(v: string) {
   return v.replace(/\D/g, '');
@@ -14,17 +14,10 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const db = createServiceClient();
-    const { data, error } = await db
-      .from('seating')
-      .select('id, first_name, last_name, email, phone, table_number');
-
-    if (error) {
-      console.error('[table/lookup] DB error:', error);
-      return NextResponse.json({ error: 'Database error' }, { status: 500 });
-    }
-
-    const guests = data ?? [];
+    const sql = db();
+    const guests = (await sql`
+      SELECT id, first_name, last_name, email, phone, table_number FROM seating
+    `) as Pick<Seating, 'id' | 'first_name' | 'last_name' | 'email' | 'phone' | 'table_number'>[];
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(query);
     const queryDigits = normalizePhone(query);
     const isPhone = !isEmail && queryDigits.length >= 7;

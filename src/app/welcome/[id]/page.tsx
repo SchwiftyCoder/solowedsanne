@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { createServiceClient } from '@/lib/supabase';
+import { db, type Seating } from '@/lib/db';
 import { WEDDING_DETAILS } from '@/lib/wedding-details';
 import { AmpersandEmblem, Divider, BotanicalLeaf } from '@/components/WeddingMotifs';
 
@@ -9,14 +9,16 @@ type Props = { params: Promise<{ id: string }> };
 export default async function WelcomePage({ params }: Props) {
   const { id } = await params;
 
-  const db = createServiceClient();
-  const { data: guest, error } = await db
-    .from('seating')
-    .select('*')
-    .eq('id', id)
-    .maybeSingle();
+  let guest: Seating | undefined;
+  try {
+    const sql = db();
+    const rows = (await sql`SELECT * FROM seating WHERE id = ${id}`) as Seating[];
+    guest = rows[0];
+  } catch (err) {
+    console.error('[welcome/[id]] DB error:', err);
+  }
 
-  if (error || !guest) {
+  if (!guest) {
     notFound();
   }
 

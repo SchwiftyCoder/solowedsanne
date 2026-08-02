@@ -1,37 +1,35 @@
 <#
 Imports guests straight from the Google Forms RSVP CSV export (Timestamp | First Name |
-Last Name | Phone | Email | RSVP answer | Message) into the Supabase `seating` table.
+Last Name | Phone | Email | RSVP answer | Message) by POSTing to this app's own
+/api/admin/import-guests endpoint, which upserts them into the `seating` table.
 
 There's no seating chart yet, so this auto-assigns table numbers in row order
 (GUESTS_PER_TABLE per table) as a placeholder - move people between tables afterward
-directly in the Supabase table editor if needed.
+directly in the database if needed.
 
 Upserts on the (first_name, last_name, phone) identity key, so re-running this after
 the guest list changes updates existing guests in place (same id, same welcome link)
 instead of deleting and regenerating everyone. Only a guest's first/last name/phone
-change would create a duplicate row rather than update the existing one.
+change would create a duplicate row rather than update the existing one. Note this
+also means table_number/is_family are recomputed and overwritten on every run - any
+manual reseating done directly in the database will be reset if you re-run this.
 
 Usage:
-  $env:SUPABASE_URL = "https://xxxx.supabase.co"
-  $env:SUPABASE_SERVICE_ROLE_KEY = "..."
-  ./scripts/import-seating.ps1 -CsvPath "C:\path\to\RSVP export.csv"
+  ./scripts/import-seating.ps1 -CsvPath "C:\path\to\RSVP export.csv" -SiteUrl "https://solowedsanne.com" -AdminPassword "..."
 
   # Importing a separate family list into different tables, flagged as family:
-  ./scripts/import-seating.ps1 -CsvPath "C:\path\to\family RSVP export.csv" -IsFamily -StartingTable 12
+  ./scripts/import-seating.ps1 -CsvPath "C:\path\to\family RSVP export.csv" -IsFamily -StartingTable 12 -SiteUrl "https://solowedsanne.com" -AdminPassword "..."
 #>
 param(
     [Parameter(Mandatory = $true)][string]$CsvPath,
+    [Parameter(Mandatory = $true)][string]$SiteUrl,
+    [Parameter(Mandatory = $true)][string]$AdminPassword,
     [int]$GuestsPerTable = 8,
     [int]$StartingTable = 1,
     [switch]$IsFamily
 )
 
 $ErrorActionPreference = "Stop"
-
-if (-not $env:SUPABASE_URL -or -not $env:SUPABASE_SERVICE_ROLE_KEY) {
-    Write-Error "Set `$env:SUPABASE_URL and `$env:SUPABASE_SERVICE_ROLE_KEY before running this script."
-    exit 1
-}
 
 function Normalize-Phone([string]$raw) {
     $digits = ($raw -replace '\D', '')
@@ -84,12 +82,12 @@ foreach ($row in $csvRows) {
     }
 
     if ("$firstName $lastName" -match $bundledPattern) {
-        Write-Warning "Row looks like it bundles more than one guest: '$firstName $lastName' - imported as-is, split manually in Supabase if needed."
+        Write-Warning "Row looks like it bundles more than one guest: '$firstName $lastName' - imported as-is, split manually in the database if needed."
     }
 
     $phone = Normalize-Phone ([string]$row.$phoneCol)
     if ($phone -match '^\+0') {
-        Write-Warning "Phone for $firstName $lastName ('$($row.$phoneCol)') normalized to '$phone', which looks malformed - check it manually in Supabase."
+        Write-Warning "Phone for $firstName $lastName ('$($row.$phoneCol)') normalized to '$phone', which looks malformed - check it manually in the database."
     }
     $email = if ($emailCol) { ([string]$row.$emailCol).Trim().ToLower() } else { '' }
     $message = if ($messageCol) { ([string]$row.$messageCol).Trim() } else { '' }
@@ -113,22 +111,23 @@ foreach ($row in $csvRows) {
 
 Write-Host "Parsed $($rows.Count) guests across $tableNumber tables ($GuestsPerTable per table)."
 
+$pair = "admin:$AdminPassword"
+$b64 = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($pair))
 $headers = @{
-    "apikey"        = $env:SUPABASE_SERVICE_ROLE_KEY
-    "Authorization" = "Bearer $($env:SUPABASE_SERVICE_ROLE_KEY)"
+    "Authorization" = "Basic $b64"
     "Content-Type"  = "application/json"
-    "Prefer"        = "return=minimal,resolution=merge-duplicates"
 }
 
 $batchSize = 50
+$totalUpserted = 0
 for ($i = 0; $i -lt $rows.Count; $i += $batchSize) {
     $batch = $rows[$i..([Math]::Min($i + $batchSize - 1, $rows.Count - 1))]
-    $body = $batch | ConvertTo-Json -Depth 3
-    if ($batch.Count -eq 1) { $body = "[$body]" }
+    $body = @{ rows = $batch } | ConvertTo-Json -Depth 4
 
-    $uri = "$($env:SUPABASE_URL)/rest/v1/seating?on_conflict=first_name,last_name,phone"
-    Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -Body $body | Out-Null
+    $uri = "$($SiteUrl.TrimEnd('/'))/api/admin/import-guests"
+    $resp = Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -Body $body
+    $totalUpserted += $resp.upserted
     Write-Host "Upserted rows $($i + 1)-$([Math]::Min($i + $batchSize, $rows.Count))"
 }
 
-Write-Host "Done. $($rows.Count) guests imported."
+Write-Host "Done. $totalUpserted guests imported."

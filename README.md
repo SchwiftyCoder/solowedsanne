@@ -2,8 +2,8 @@
 
 A Next.js app for Solomon & Anne's wedding:
 
-- Guests enter their name, email, or phone number on the home page and are shown their table number and a link to the shared photo album.
-- `/admin` (password protected) has two buttons to text every guest: a reminder with the wedding details, and a post-wedding thank-you.
+- Guests enter their name, email, or phone number on the home page and are shown their table number, the wedding program, and links to view/upload photos.
+- `/admin` (password protected) has three tools: send a reminder SMS to every guest, send a thank-you SMS (locked until a month after the wedding), and text a one-off number for testing.
 
 ## 1. Install dependencies
 
@@ -13,21 +13,22 @@ npm install
 
 > If `npm`/`node` aren't recognized in your terminal, Node.js is installed at `C:\Program Files\nodejs` but may not be on your `PATH`. Either add that folder to your system `PATH` (search "Edit environment variables" in Windows) and restart your terminal, or reinstall from [nodejs.org](https://nodejs.org) and let it register itself.
 
-## 2. Set up Supabase (the database)
+## 2. Set up Neon (the database)
 
-1. Create a free project at [supabase.com](https://supabase.com).
-2. In the Supabase dashboard, open the **SQL Editor** and run everything in [`supabase-schema.sql`](./supabase-schema.sql). This creates the `seating` table (guest name, email, phone, table/seat number).
-3. Go to **Settings > API** and copy:
-   - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
-   - **service_role secret** → `SUPABASE_SERVICE_ROLE_KEY` (keep this secret — never expose it to the browser)
+1. Create a free project at [neon.tech](https://neon.tech).
+2. In the Neon dashboard's **SQL Editor**, run everything in [`schema.sql`](./schema.sql). This creates the `seating` table (guest name, email, phone, table number, message, family flag).
+3. Go to your project's **Connection Details** and copy the connection string (starts with `postgresql://...`) → `DATABASE_URL`.
+
+Neon's free tier auto-wakes on the next query after being idle — unlike some providers, it never needs a manual restart.
 
 ## 3. Set up Twilio (SMS)
 
 1. Create an account at [twilio.com](https://www.twilio.com) and buy/activate a phone number capable of sending SMS.
 2. From the Twilio Console copy your **Account SID** and **Auth Token**.
 3. Note the Twilio phone number in `+1XXXXXXXXXX` format.
+4. Complete **A2P 10DLC registration** (Messaging > Regulatory Compliance in the Twilio Console) — US carriers block SMS from unregistered numbers. A Sole Proprietor brand + low-volume campaign is enough for personal use and needs no business EIN.
 
-Trial Twilio accounts can only text phone numbers you've manually verified in the console — you'll need a paid account to text your full guest list.
+Trial Twilio accounts can only text phone numbers you've manually verified in the console — you'll need a paid account to text your full guest list. This app only sends to US (`+1`) numbers; anything else is skipped.
 
 ## 4. Configure environment variables
 
@@ -38,28 +39,29 @@ cp .env.local.example .env.local
 ```
 
 ```
-NEXT_PUBLIC_SUPABASE_URL=...
-SUPABASE_SERVICE_ROLE_KEY=...
+DATABASE_URL=...
 TWILIO_ACCOUNT_SID=...
 TWILIO_AUTH_TOKEN=...
 TWILIO_PHONE_NUMBER=...
 ADMIN_PASSWORD=...        # pick your own password for the /admin page
 SITE_URL=http://localhost:3000   # update to your real domain after deploying
+SYNC_SECRET=...           # shared secret for the Google Apps Script sync (see below)
 ```
 
 `.env.local` is already git-ignored, so these secrets never get committed.
 
 ## 5. Import the guest list
 
-`scripts/import-seating.ps1` reads the Google Forms RSVP CSV export (Timestamp, First Name, Last Name, phone number, email, RSVP answer, message) and auto-assigns table/seat numbers in row order (8 guests per table by default — pass `-GuestsPerTable` to change it). Each run truncates and re-inserts the whole `seating` table, so it's safe to re-run whenever the guest list changes:
+`scripts/import-seating.ps1` reads a Google Forms RSVP CSV export (Timestamp, First Name, Last Name, phone number, email, RSVP answer, message) and POSTs it to this app's own `/api/admin/import-guests` endpoint, which upserts guests on their (first name, last name, phone) identity — safe to re-run whenever the guest list changes without regenerating everyone's id/welcome link. Table numbers auto-assign in row order (8 guests per table by default — pass `-GuestsPerTable` to change it), but are recomputed on every run, so any manual reseating done directly in the database will be overwritten by a re-import.
 
 ```powershell
-$env:SUPABASE_URL = "https://your-project.supabase.co"
-$env:SUPABASE_SERVICE_ROLE_KEY = "your-service-role-key"
-./scripts/import-seating.ps1 -CsvPath "C:\path\to\RSVP export.csv"
+./scripts/import-seating.ps1 -CsvPath "C:\path\to\RSVP export.csv" -SiteUrl "https://solowedsanne.com" -AdminPassword "your-admin-password"
+
+# Importing a separate family list into different tables, flagged as family:
+./scripts/import-seating.ps1 -CsvPath "C:\path\to\family RSVP export.csv" -IsFamily -StartingTable 12 -SiteUrl "https://solowedsanne.com" -AdminPassword "your-admin-password"
 ```
 
-Since there's no seating chart yet, table/seat numbers start as a placeholder — reassign guests to specific tables afterward directly in the Supabase table editor.
+For live auto-sync (new RSVPs added automatically without re-running anything), a Google Apps Script trigger on each response sheet can POST new submissions to `/api/sync/guests` — see `src/app/api/sync/guests/route.ts` for the expected payload shape.
 
 ## 6. Run the dev server
 
@@ -67,32 +69,36 @@ Since there's no seating chart yet, table/seat numbers start as a placeholder �
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to test the guest lookup flow, and [http://localhost:3000/admin](http://localhost:3000/admin) (browser will prompt for a username + your `ADMIN_PASSWORD`) to test the SMS buttons.
+Open [http://localhost:3000](http://localhost:3000) to test the guest lookup flow, and [http://localhost:3000/admin](http://localhost:3000/admin) (browser will prompt for a username + your `ADMIN_PASSWORD`) to test the SMS tools.
 
 ## 7. Deploy
 
-Push this repo to GitHub (e.g. under [github.com/SchwiftyCoder](https://github.com/SchwiftyCoder)) and deploy on [Vercel](https://vercel.com/new) — import the repo, add all the `.env.local` variables in the Vercel project's Environment Variables settings, and set `SITE_URL` to your production domain (e.g. `https://solowedsanne.vercel.app`). Vercel auto-deploys on every push to `main`.
+Push this repo to GitHub and deploy on [Vercel](https://vercel.com/new) — import the repo, add all the `.env.local` variables in the Vercel project's Environment Variables settings, and set `SITE_URL` to your production domain. Vercel auto-deploys on every push to `main`.
 
 ## Using the admin page
 
 - Visit `/admin` any time after guests are imported.
-- **Send Wedding Reminder** — texts every guest the date, time, venue, dress code, and their personal table link. Use this in the days before the wedding.
-- **Send Thank You Message** — texts every guest a thank-you note with the photo album link. Use this after the wedding.
+- **Send Reminder** — write and preview a reminder text, personalized with each guest's name, sent to every US number on file.
+- **Send Thank You** — same, but locked until a month after the wedding.
+- **Test** — send a one-off message to any US phone number, not tied to a guest record.
 
-Both buttons ask for confirmation before sending and report how many messages succeeded/failed.
+Every send has a preview step and a final confirmation before anything goes out, and reports how many messages succeeded/failed/were skipped for being non-US.
 
 ## Project structure
 
 ```
-src/app/page.tsx                  Guest entry (name/email/phone lookup)
-src/app/welcome/[id]/page.tsx     Table number + photos link
-src/app/admin/page.tsx            Admin SMS trigger page
-src/app/api/table/lookup/         Guest lookup API
-src/app/api/admin/                Admin APIs (guest count, send SMS)
-src/lib/supabase.ts               Supabase client factory
-src/lib/twilio.ts                 Twilio SMS sending
-src/lib/wedding-details.ts        Shared wedding info used in SMS templates
-src/proxy.ts                      Password-gates /admin and /api/admin/*
-scripts/import-seating.ps1        Imports the guest list Excel file
-supabase-schema.sql               Database schema
+src/app/page.tsx                       Guest entry (name/email/phone lookup)
+src/app/welcome/[id]/page.tsx          Table number + program + photo links
+src/app/welcome/[id]/program/page.tsx  Wedding day event timeline
+src/app/admin/page.tsx                 Admin SMS tools
+src/app/api/table/lookup/              Guest lookup API
+src/app/api/admin/                     Admin APIs (guest count, send SMS, bulk import)
+src/app/api/sync/guests/               Webhook for the Google Apps Script live sync
+src/lib/db.ts                          Neon client factory
+src/lib/twilio.ts                      Twilio SMS sending
+src/lib/phone.ts                       Phone normalization + US-number check
+src/lib/wedding-details.ts             Shared wedding info used in SMS templates
+src/proxy.ts                           Password-gates /admin and /api/admin/*
+scripts/import-seating.ps1             Imports a guest list CSV
+schema.sql                             Database schema
 ```

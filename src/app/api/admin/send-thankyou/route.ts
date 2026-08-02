@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createServiceClient } from '@/lib/supabase';
+import { db } from '@/lib/db';
 import { sendBulkSms } from '@/lib/twilio';
 import { isThankYouAvailable, thankYouAvailableAt } from '@/lib/wedding-details';
 import { isUSNumber } from '@/lib/phone';
@@ -19,15 +19,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
-    const db = createServiceClient();
-    const { data: guests, error } = await db.from('seating').select('id, first_name, phone');
+    const sql = db();
+    const guests = (await sql`SELECT id, first_name, phone FROM seating`) as { id: string; first_name: string; phone: string }[];
 
-    if (error) {
-      console.error('[admin/send-thankyou] DB error:', error);
-      return NextResponse.json({ error: 'Database error' }, { status: 500 });
-    }
-
-    if (!guests || guests.length === 0) {
+    if (guests.length === 0) {
       return NextResponse.json({ error: 'No guests found' }, { status: 400 });
     }
 

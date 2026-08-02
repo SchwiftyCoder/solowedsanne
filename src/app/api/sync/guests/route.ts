@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import { normalizePhone } from '@/lib/phone';
 
 // Called by a Google Apps Script trigger bound to each RSVP form's response
 // sheet, once per new form submission. Inserts brand-new guests (auto-assigning
@@ -8,15 +9,6 @@ import { createServiceClient } from '@/lib/supabase';
 // number and family flag are never touched here, so manual reseating in
 // Supabase never gets clobbered by a late RSVP trickling in.
 const GUESTS_PER_TABLE = 8;
-
-function normalizePhone(raw: string): string {
-  const digits = (raw || '').replace(/\D/g, '');
-  if (digits.startsWith('00') && digits.length > 2) return `+${digits.slice(2)}`;
-  if (digits.length === 11 && digits.startsWith('1')) return `+${digits}`;
-  if (digits.length === 10) return `+1${digits}`;
-  if (digits.length > 0) return `+${digits}`;
-  return '';
-}
 
 export async function POST(req: Request) {
   const secret = req.headers.get('x-sync-secret');

@@ -38,24 +38,23 @@ export function isThankYouAvailable(): boolean {
   return Date.now() >= thankYouAvailableAt().getTime();
 }
 
-export function siteUrl() {
-  return (process.env.SITE_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000').replace(/\/$/, '');
-}
-
-export function welcomeUrl(id: string) {
-  return `${siteUrl()}/welcome/${id}`;
-}
-
 export function venueMapsUrl() {
   const query = `${WEDDING_DETAILS.venueName}, ${WEDDING_DETAILS.venueAddress}`;
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 }
 
-export function reminderMessage(firstName: string, id: string) {
+export function defaultReminderText() {
   return (
-    `Hi ${firstName}! Reminder for ${WEDDING_DETAILS.coupleNames}'s wedding: ` +
-    `${WEDDING_DETAILS.dateText} at ${WEDDING_DETAILS.timeText}, ${WEDDING_DETAILS.venueName}. ` +
+    `Reminder for ${WEDDING_DETAILS.coupleNames}'s wedding: ` +
+    `${WEDDING_DETAILS.dateText} at ${WEDDING_DETAILS.timeText}, ${WEDDING_DETAILS.venueName}, ${WEDDING_DETAILS.venueAddress}. ` +
     `Directions: ${venueMapsUrl()} ` +
-    `Dress code: ${WEDDING_DETAILS.dressCode}. Find your table: ${welcomeUrl(id)}`
+    `Dress code: ${WEDDING_DETAILS.dressCode}. See you there!`
+  );
+}
+
+export function defaultThankYouText() {
+  return (
+    `Thank you so much for celebrating with ${WEDDING_DETAILS.coupleNames} on our wedding day - ` +
+    `it meant the world to have you there. Add your own photos here: ${WEDDING_DETAILS.photosUploadUrl}`
   );
 }

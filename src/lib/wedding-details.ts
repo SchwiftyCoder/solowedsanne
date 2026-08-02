@@ -38,17 +38,10 @@ export function isThankYouAvailable(): boolean {
   return Date.now() >= thankYouAvailableAt().getTime();
 }
 
-export function venueMapsUrl() {
-  const query = `${WEDDING_DETAILS.venueName}, ${WEDDING_DETAILS.venueAddress}`;
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
-}
-
 export function defaultReminderText() {
   return (
-    `Reminder for ${WEDDING_DETAILS.coupleNames}'s wedding: ` +
-    `${WEDDING_DETAILS.dateText} at ${WEDDING_DETAILS.timeText}, ${WEDDING_DETAILS.venueName}, ${WEDDING_DETAILS.venueAddress}. ` +
-    `Directions: ${venueMapsUrl()} ` +
-    `Dress code: ${WEDDING_DETAILS.dressCode}. See you there!`
+    'Wedding Reminder: Solomon & Anne, Fri Sep 4, 2PM at La Maison, 33 Washington Ave, Belleville NJ. ' +
+    'Dress code: White. Reply YES or NO to RSVP! solowedsanne.com'
   );
 }
 

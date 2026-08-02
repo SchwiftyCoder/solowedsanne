@@ -147,6 +147,12 @@ export default function EntryPage() {
         </div>
 
         <div className="text-center mt-4">
+          <Link href="/rsvp" className="text-xs uppercase tracking-widest underline" style={{ color: '#B8860B' }}>
+            Confirm Your Attendance
+          </Link>
+        </div>
+
+        <div className="text-center mt-3">
           <Link href="/privacy" className="text-xs underline" style={{ color: '#2C2C2C', opacity: 0.4 }}>
             Privacy Policy &amp; Terms
           </Link>

@@ -12,9 +12,11 @@ export type Seating = {
   last_name: string;
   email: string;
   phone: string;
-  table_number: number;
+  table_number: string;
   message: string;
   is_family: boolean | null;
+  rsvp_status: 'pending' | 'yes' | 'no';
+  excluded_from_texts: boolean;
   created_at: string;
   updated_at: string;
 };

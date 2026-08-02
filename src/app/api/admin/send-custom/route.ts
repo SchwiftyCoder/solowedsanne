@@ -12,13 +12,15 @@ export async function POST(req: Request) {
     }
 
     const sql = db();
-    const guests = (await sql`SELECT id, first_name, phone FROM seating`) as { id: string; first_name: string; phone: string }[];
+    const guests = (await sql`
+      SELECT id, first_name, phone, excluded_from_texts FROM seating
+    `) as { id: string; first_name: string; phone: string; excluded_from_texts: boolean }[];
 
     if (guests.length === 0) {
       return NextResponse.json({ error: 'No guests found' }, { status: 400 });
     }
 
-    const usGuests = guests.filter((g) => isUSNumber(g.phone));
+    const usGuests = guests.filter((g) => !g.excluded_from_texts && isUSNumber(g.phone));
     const skipped = guests.length - usGuests.length;
 
     const trimmed = message.trim();

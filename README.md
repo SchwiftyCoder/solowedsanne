@@ -52,16 +52,23 @@ SYNC_SECRET=...           # shared secret for the Google Apps Script sync (see b
 
 ## 5. Import the guest list
 
-`scripts/import-seating.ps1` reads a Google Forms RSVP CSV export (Timestamp, First Name, Last Name, phone number, email, RSVP answer, message) and POSTs it to this app's own `/api/admin/import-guests` endpoint, which upserts guests on their (first name, last name, phone) identity — safe to re-run whenever the guest list changes without regenerating everyone's id/welcome link. Table numbers auto-assign in row order (8 guests per table by default — pass `-GuestsPerTable` to change it), but are recomputed on every run, so any manual reseating done directly in the database will be overwritten by a re-import.
+`scripts/import-seating.ps1` reads a Google Forms RSVP CSV export (Timestamp, First Name, Last Name, phone number, email, RSVP answer, message) and POSTs it to this app's own `/api/admin/import-guests` endpoint, which upserts guests on their (first name, last name, phone) identity — safe to re-run whenever the guest list changes without regenerating everyone's id/welcome link. Every guest's table number starts as `'TBA'`; assign real tables later by editing that column directly in the database.
 
 ```powershell
 ./scripts/import-seating.ps1 -CsvPath "C:\path\to\RSVP export.csv" -SiteUrl "https://solowedsanne.com" -AdminPassword "your-admin-password"
 
-# Importing a separate family list into different tables, flagged as family:
-./scripts/import-seating.ps1 -CsvPath "C:\path\to\family RSVP export.csv" -IsFamily -StartingTable 12 -SiteUrl "https://solowedsanne.com" -AdminPassword "your-admin-password"
+# Full replace - wipes every existing guest first, then imports only this file:
+./scripts/import-seating.ps1 -CsvPath "C:\path\to\RSVP export.csv" -Replace -SiteUrl "https://solowedsanne.com" -AdminPassword "your-admin-password"
+
+# Importing a separate family list, flagged as family:
+./scripts/import-seating.ps1 -CsvPath "C:\path\to\family RSVP export.csv" -IsFamily -SiteUrl "https://solowedsanne.com" -AdminPassword "your-admin-password"
 ```
 
 For live auto-sync (new RSVPs added automatically without re-running anything), a Google Apps Script trigger on each response sheet can POST new submissions to `/api/sync/guests` — see `src/app/api/sync/guests/route.ts` for the expected payload shape.
+
+## RSVP-by-text
+
+The reminder SMS ends with "Reply YES or NO to RSVP!" — replies are handled by `/api/sms/inbound`, which you need to set as the "A message comes in" webhook on your Twilio number (Console → Phone Numbers → your number → Messaging configuration). It verifies the request came from Twilio, records `yes`/`no` on every guest sharing that phone number (couples often share one), and replies with a confirmation text. The admin page's guest counts and the "Awaiting RSVP" table update from this automatically.
 
 ## 6. Run the dev server
 
@@ -78,11 +85,13 @@ Push this repo to GitHub and deploy on [Vercel](https://vercel.com/new) — impo
 ## Using the admin page
 
 - Visit `/admin` any time after guests are imported.
-- **Send Reminder** — write and preview a reminder text, personalized with each guest's name, sent to every US number on file.
+- Info card shows **Total Guests** and **Total Yes RSVPs** (from text replies, not the original form).
+- **Send Reminder** — write and preview a reminder text, personalized with each guest's name, sent to every non-excluded US number on file.
 - **Send Thank You** — same, but locked until a month after the wedding.
 - **Test** — send a one-off message to any US phone number, not tied to a guest record.
+- **Awaiting RSVP** — a sortable, hideable table at the bottom listing everyone who hasn't texted back YES yet (pending or explicit no), with name and phone. Shrinks as replies come in.
 
-Every send has a preview step and a final confirmation before anything goes out, and reports how many messages succeeded/failed/were skipped for being non-US.
+Every send has a preview step and a final confirmation before anything goes out, and reports how many messages succeeded/failed/were skipped (non-US or flagged `excluded_from_texts`).
 
 ## Project structure
 
@@ -94,6 +103,7 @@ src/app/admin/page.tsx                 Admin SMS tools
 src/app/api/table/lookup/              Guest lookup API
 src/app/api/admin/                     Admin APIs (guest count, send SMS, bulk import)
 src/app/api/sync/guests/               Webhook for the Google Apps Script live sync
+src/app/api/sms/inbound/               Twilio webhook for guest YES/NO replies
 src/lib/db.ts                          Neon client factory
 src/lib/twilio.ts                      Twilio SMS sending
 src/lib/phone.ts                       Phone normalization + US-number check

@@ -3,12 +3,11 @@ import { db } from '@/lib/db';
 import { normalizePhone } from '@/lib/phone';
 
 // Called by a Google Apps Script trigger bound to each RSVP form's response
-// sheet, once per new form submission. Inserts brand-new guests (auto-assigning
-// the next table number for their category) and, for guests who already exist
-// (same first/last name + phone), only refreshes their email/message - table
-// number and family flag are never touched here, so manual reseating in
-// the database never gets clobbered by a late RSVP trickling in.
-const GUESTS_PER_TABLE = 8;
+// sheet, once per new form submission. Inserts brand-new guests (table_number
+// starts as 'TBA' - real seating hasn't been assigned yet) and, for guests who
+// already exist (same first/last name + phone), only refreshes their
+// email/message - table number and family flag are never touched here, so
+// manual edits in the database never get clobbered by a late RSVP trickling in.
 
 export async function POST(req: Request) {
   const secret = req.headers.get('x-sync-secret');
@@ -21,7 +20,6 @@ export async function POST(req: Request) {
     const firstName = String(body.first_name || '').trim();
     const lastName = String(body.last_name || '').trim();
     const isFamily = !!body.isFamily;
-    const startingTable = Number.isFinite(body.startingTable) ? Number(body.startingTable) : 1;
 
     if (!firstName && !lastName) {
       return NextResponse.json({ error: 'Missing name' }, { status: 400 });
@@ -47,27 +45,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ updated: true, id });
     }
 
-    const categoryRows = (await sql`
-      SELECT table_number FROM seating WHERE is_family = ${isFamily} ORDER BY table_number DESC LIMIT 1
-    `) as { table_number: number }[];
-
-    let tableNumber = startingTable;
-    if (categoryRows.length > 0) {
-      const lastTable = categoryRows[0].table_number;
-      const countRows = (await sql`
-        SELECT COUNT(*)::int AS count FROM seating WHERE is_family = ${isFamily} AND table_number = ${lastTable}
-      `) as { count: number }[];
-
-      tableNumber = countRows[0].count >= GUESTS_PER_TABLE ? lastTable + 1 : lastTable;
-    }
-
     const insertedRows = (await sql`
-      INSERT INTO seating (first_name, last_name, email, phone, table_number, message, is_family)
-      VALUES (${firstName}, ${lastName}, ${email}, ${phone}, ${tableNumber}, ${message}, ${isFamily})
+      INSERT INTO seating (first_name, last_name, email, phone, message, is_family)
+      VALUES (${firstName}, ${lastName}, ${email}, ${phone}, ${message}, ${isFamily})
       RETURNING id
     `) as { id: string }[];
 
-    return NextResponse.json({ inserted: true, id: insertedRows[0].id, table_number: tableNumber });
+    return NextResponse.json({ inserted: true, id: insertedRows[0].id });
   } catch (err) {
     console.error('[sync/guests] Unexpected error:', err);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });

@@ -4,10 +4,12 @@ import { db } from '@/lib/db';
 export async function GET() {
   try {
     const sql = db();
-    const data = (await sql`SELECT id, table_number FROM seating`) as { id: string; table_number: number }[];
+    const guests = (await sql`
+      SELECT id, first_name, last_name, phone, rsvp_status FROM seating ORDER BY first_name, last_name
+    `) as { id: string; first_name: string; last_name: string; phone: string; rsvp_status: string }[];
 
-    const tableCount = new Set(data.map((g) => g.table_number)).size;
-    return NextResponse.json({ count: data.length, tableCount });
+    const yesCount = guests.filter((g) => g.rsvp_status === 'yes').length;
+    return NextResponse.json({ count: guests.length, yesCount, guests });
   } catch (err) {
     console.error('[admin/guests] Unexpected error:', err);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });

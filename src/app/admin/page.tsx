@@ -3,24 +3,56 @@
 import { useEffect, useState } from 'react';
 import { WEDDING_DETAILS, isThankYouAvailable, thankYouAvailableAt, defaultReminderText, defaultThankYouText } from '@/lib/wedding-details';
 
+type Guest = { id: string; first_name: string; last_name: string; phone: string; rsvp_status: 'pending' | 'yes' | 'no' };
 type SmsResult = { total: number; sent: number; failed: number; skipped?: number; errors: { to: string; error?: string }[] };
 type Step = 'compose' | 'preview';
+type SortKey = 'name' | 'phone' | 'status';
+
+function statusRank(s: string) {
+  return s === 'no' ? 0 : s === 'pending' ? 1 : 2;
+}
+
+function compareGuests(a: Guest, b: Guest, key: SortKey): number {
+  switch (key) {
+    case 'name':
+      return `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`);
+    case 'phone':
+      return a.phone.localeCompare(b.phone);
+    case 'status':
+      return statusRank(a.rsvp_status) - statusRank(b.rsvp_status);
+  }
+}
 
 export default function AdminPage() {
-  const [guestCount, setGuestCount] = useState<number | null>(null);
-  const [tableCount, setTableCount] = useState<number | null>(null);
+  const [guests, setGuests] = useState<Guest[] | null>(null);
+  const [yesCount, setYesCount] = useState<number | null>(null);
   const [loadError, setLoadError] = useState('');
+  const [showPending, setShowPending] = useState(true);
+  const [sort, setSort] = useState<{ key: SortKey; dir: 'asc' | 'desc' }>({ key: 'name', dir: 'asc' });
 
   useEffect(() => {
+    loadGuests();
+  }, []);
+
+  function loadGuests() {
     fetch('/api/admin/guests')
       .then((res) => res.json())
       .then((data) => {
         if (data.error) { setLoadError(data.error); return; }
-        setGuestCount(data.count);
-        setTableCount(data.tableCount);
+        setGuests(data.guests ?? []);
+        setYesCount(data.yesCount ?? 0);
       })
-      .catch(() => setLoadError('Could not load guest count.'));
-  }, []);
+      .catch(() => setLoadError('Could not load guest list.'));
+  }
+
+  function toggleSort(key: SortKey) {
+    setSort((prev) => (prev.key === key ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' }));
+  }
+
+  const pendingGuests = guests ? guests.filter((g) => g.rsvp_status !== 'yes') : null;
+  const sortedPending = pendingGuests
+    ? [...pendingGuests].sort((a, b) => (sort.dir === 'asc' ? 1 : -1) * compareGuests(a, b, sort.key))
+    : null;
 
   return (
     <main className="min-h-screen px-4 py-12" style={{ background: '#FDFAF5' }}>
@@ -37,20 +69,20 @@ export default function AdminPage() {
         {/* Wedding info card */}
         <div className="rounded-2xl shadow-sm px-6 py-5 border mb-6 grid grid-cols-2 gap-4 text-sm"
           style={{ background: '#fff', borderColor: '#e8dfc8', color: '#2C2C2C' }}>
-          <InfoStat label="Tables" value={loadError ? '—' : tableCount === null ? '…' : String(tableCount)} />
-          <InfoStat label="Date" value={WEDDING_DETAILS.dateText.replace(/^\w+, /, '')} />
+          <InfoStat label="Total Guests" value={loadError ? '—' : guests === null ? '…' : String(guests.length)} />
+          <InfoStat label="Total Yes RSVPs" value={loadError ? '—' : yesCount === null ? '…' : String(yesCount)} />
           <div className="col-span-2 text-xs pt-2 border-t" style={{ borderColor: '#f0e8d4', opacity: 0.7 }}>
-            {WEDDING_DETAILS.timeText} &middot; {WEDDING_DETAILS.venueName}, {WEDDING_DETAILS.venueAddress}
+            {WEDDING_DETAILS.dateText} &middot; {WEDDING_DETAILS.timeText} &middot; {WEDDING_DETAILS.venueName}, {WEDDING_DETAILS.venueAddress}
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-6 mb-8">
           <MessageComposer
             title="Send Reminder"
             description="Texts every guest a reminder you write. Personalized with each guest's name."
             endpoint="/api/admin/send-custom"
             defaultText={defaultReminderText()}
-            guestCount={guestCount}
+            guestCount={guests?.length ?? null}
             locked={false}
           />
 
@@ -63,14 +95,92 @@ export default function AdminPage() {
             }
             endpoint="/api/admin/send-thankyou"
             defaultText={defaultThankYouText()}
-            guestCount={guestCount}
+            guestCount={guests?.length ?? null}
             locked={!isThankYouAvailable()}
           />
 
           <SingleNumberComposer />
         </div>
+
+        {/* Awaiting RSVP table - shrinks as guests reply YES by text */}
+        <div className="rounded-2xl shadow-sm border overflow-hidden" style={{ background: '#fff', borderColor: '#e8dfc8' }}>
+          <div className="px-6 py-4 flex items-center justify-between border-b" style={{ borderColor: '#f0e8d4' }}>
+            <h2 className="font-serif text-lg" style={{ color: '#2C2C2C' }}>
+              Awaiting RSVP{sortedPending ? ` (${sortedPending.length})` : ''}
+            </h2>
+            <div className="flex items-center gap-4">
+              <button onClick={() => setShowPending((p) => !p)} className="text-xs underline" style={{ color: '#B8860B' }}>
+                {showPending ? 'Hide' : 'Show'}
+              </button>
+              <button onClick={loadGuests} className="text-xs underline" style={{ color: '#B8860B' }}>
+                Refresh
+              </button>
+            </div>
+          </div>
+
+          {!showPending ? null : loadError ? (
+            <p className="px-6 py-6 text-sm" style={{ color: '#B00020' }}>{loadError}</p>
+          ) : sortedPending === null ? (
+            <p className="px-6 py-6 text-sm" style={{ color: '#2C2C2C', opacity: 0.6 }}>Loading…</p>
+          ) : sortedPending.length === 0 ? (
+            <p className="px-6 py-6 text-sm" style={{ color: '#1B5E20' }}>Everyone has replied yes.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left uppercase text-xs tracking-wide" style={{ color: '#B8860B' }}>
+                    <SortableHeader className="px-6 py-2" label="Guest" sortKey="name" sort={sort} onSort={toggleSort} />
+                    <SortableHeader className="px-4 py-2" label="Phone" sortKey="phone" sort={sort} onSort={toggleSort} />
+                    <SortableHeader className="px-6 py-2" label="Status" sortKey="status" sort={sort} onSort={toggleSort} />
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedPending.map((g) => (
+                    <tr key={g.id} className="border-t" style={{ borderColor: '#f5efdc', color: '#2C2C2C' }}>
+                      <td className="px-6 py-2">{g.first_name} {g.last_name}</td>
+                      <td className="px-4 py-2" style={{ opacity: 0.75 }}>{g.phone}</td>
+                      <td className="px-6 py-2">
+                        <span style={{ color: g.rsvp_status === 'no' ? '#B00020' : '#2C2C2C', opacity: g.rsvp_status === 'no' ? 1 : 0.6 }}>
+                          {g.rsvp_status === 'no' ? 'No' : 'Pending'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
     </main>
+  );
+}
+
+function SortableHeader({
+  label,
+  sortKey,
+  sort,
+  onSort,
+  className,
+}: {
+  label: string;
+  sortKey: SortKey;
+  sort: { key: SortKey; dir: 'asc' | 'desc' };
+  onSort: (key: SortKey) => void;
+  className: string;
+}) {
+  const active = sort.key === sortKey;
+  return (
+    <th className={className}>
+      <button
+        onClick={() => onSort(sortKey)}
+        className="flex items-center gap-1 uppercase text-xs tracking-wide"
+        style={{ color: '#B8860B' }}
+      >
+        {label}
+        <span style={{ opacity: active ? 1 : 0.3 }}>{active && sort.dir === 'desc' ? '▼' : '▲'}</span>
+      </button>
+    </th>
   );
 }
 
@@ -196,7 +306,7 @@ function MessageComposer({
           <p>
             Sent <strong>{result.sent}</strong> of {result.total}
             {result.failed > 0 && <span style={{ color: '#B00020' }}> — {result.failed} failed</span>}
-            {!!result.skipped && <span style={{ opacity: 0.7 }}> — {result.skipped} skipped (non-US number)</span>}
+            {!!result.skipped && <span style={{ opacity: 0.7 }}> — {result.skipped} skipped (non-US or excluded)</span>}
           </p>
           {result.failed > 0 && (
             <ul className="mt-2 text-xs space-y-1" style={{ opacity: 0.7 }}>

@@ -228,6 +228,12 @@ export default function RsvpPage() {
                 {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
               </div>
 
+              <p className="text-xs leading-relaxed" style={{ color: '#2C2C2C', opacity: 0.55 }}>
+                By continuing, you agree to receive SMS updates about the wedding (reminders and RSVP
+                confirmations) at the number on file. Msg &amp; data rates may apply. Reply STOP to opt out.{' '}
+                <Link href="/privacy" className="underline">Privacy Policy</Link>.
+              </p>
+
               <button
                 type="submit"
                 disabled={loading}

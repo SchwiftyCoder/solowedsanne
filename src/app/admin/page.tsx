@@ -27,8 +27,6 @@ export default function AdminPage() {
   const [guests, setGuests] = useState<Guest[] | null>(null);
   const [yesCount, setYesCount] = useState<number | null>(null);
   const [loadError, setLoadError] = useState('');
-  const [showPending, setShowPending] = useState(true);
-  const [sort, setSort] = useState<{ key: SortKey; dir: 'asc' | 'desc' }>({ key: 'name', dir: 'asc' });
 
   useEffect(() => {
     loadGuests();
@@ -45,14 +43,8 @@ export default function AdminPage() {
       .catch(() => setLoadError('Could not load guest list.'));
   }
 
-  function toggleSort(key: SortKey) {
-    setSort((prev) => (prev.key === key ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' }));
-  }
-
   const pendingGuests = guests ? guests.filter((g) => g.rsvp_status !== 'yes') : null;
-  const sortedPending = pendingGuests
-    ? [...pendingGuests].sort((a, b) => (sort.dir === 'asc' ? 1 : -1) * compareGuests(a, b, sort.key))
-    : null;
+  const confirmedGuests = guests ? guests.filter((g) => g.rsvp_status === 'yes') : null;
 
   return (
     <main className="min-h-screen px-4 py-12" style={{ background: '#FDFAF5' }}>
@@ -102,57 +94,110 @@ export default function AdminPage() {
           <SingleNumberComposer />
         </div>
 
-        {/* Awaiting RSVP table - shrinks as guests reply YES by text */}
-        <div className="rounded-2xl shadow-sm border overflow-hidden" style={{ background: '#fff', borderColor: '#e8dfc8' }}>
-          <div className="px-6 py-4 flex items-center justify-between border-b" style={{ borderColor: '#f0e8d4' }}>
-            <h2 className="font-serif text-lg" style={{ color: '#2C2C2C' }}>
-              Awaiting RSVP{sortedPending ? ` (${sortedPending.length})` : ''}
-            </h2>
-            <div className="flex items-center gap-4">
-              <button onClick={() => setShowPending((p) => !p)} className="text-xs underline" style={{ color: '#B8860B' }}>
-                {showPending ? 'Hide' : 'Show'}
-              </button>
-              <button onClick={loadGuests} className="text-xs underline" style={{ color: '#B8860B' }}>
-                Refresh
-              </button>
-            </div>
-          </div>
+        <div className="space-y-6">
+          {/* Awaiting RSVP - shrinks as guests reply YES */}
+          <RsvpTable
+            title="Awaiting RSVP"
+            guests={pendingGuests}
+            emptyText="Everyone has replied yes."
+            showStatus
+            loadError={loadError}
+            onRefresh={loadGuests}
+          />
 
-          {!showPending ? null : loadError ? (
-            <p className="px-6 py-6 text-sm" style={{ color: '#B00020' }}>{loadError}</p>
-          ) : sortedPending === null ? (
-            <p className="px-6 py-6 text-sm" style={{ color: '#2C2C2C', opacity: 0.6 }}>Loading…</p>
-          ) : sortedPending.length === 0 ? (
-            <p className="px-6 py-6 text-sm" style={{ color: '#1B5E20' }}>Everyone has replied yes.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left uppercase text-xs tracking-wide" style={{ color: '#B8860B' }}>
-                    <SortableHeader className="px-6 py-2" label="Guest" sortKey="name" sort={sort} onSort={toggleSort} />
-                    <SortableHeader className="px-4 py-2" label="Phone" sortKey="phone" sort={sort} onSort={toggleSort} />
-                    <SortableHeader className="px-6 py-2" label="Status" sortKey="status" sort={sort} onSort={toggleSort} />
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedPending.map((g) => (
-                    <tr key={g.id} className="border-t" style={{ borderColor: '#f5efdc', color: '#2C2C2C' }}>
-                      <td className="px-6 py-2">{g.first_name} {g.last_name}</td>
-                      <td className="px-4 py-2" style={{ opacity: 0.75 }}>{g.phone}</td>
-                      <td className="px-6 py-2">
-                        <span style={{ color: g.rsvp_status === 'no' ? '#B00020' : '#2C2C2C', opacity: g.rsvp_status === 'no' ? 1 : 0.6 }}>
-                          {g.rsvp_status === 'no' ? 'No' : 'Pending'}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          {/* Confirmed - grows as guests reply YES */}
+          <RsvpTable
+            title="Confirmed Attending"
+            guests={confirmedGuests}
+            emptyText="No yes replies yet."
+            loadError={loadError}
+            onRefresh={loadGuests}
+          />
         </div>
       </div>
     </main>
+  );
+}
+
+function RsvpTable({
+  title,
+  guests,
+  emptyText,
+  showStatus = false,
+  loadError,
+  onRefresh,
+}: {
+  title: string;
+  guests: Guest[] | null;
+  emptyText: string;
+  showStatus?: boolean;
+  loadError: string;
+  onRefresh: () => void;
+}) {
+  const [show, setShow] = useState(true);
+  const [sort, setSort] = useState<{ key: SortKey; dir: 'asc' | 'desc' }>({ key: 'name', dir: 'asc' });
+
+  function toggleSort(key: SortKey) {
+    setSort((prev) => (prev.key === key ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' }));
+  }
+
+  const sorted = guests
+    ? [...guests].sort((a, b) => (sort.dir === 'asc' ? 1 : -1) * compareGuests(a, b, sort.key))
+    : null;
+
+  return (
+    <div className="rounded-2xl shadow-sm border overflow-hidden" style={{ background: '#fff', borderColor: '#e8dfc8' }}>
+      <div className="px-6 py-4 flex items-center justify-between border-b" style={{ borderColor: '#f0e8d4' }}>
+        <h2 className="font-serif text-lg" style={{ color: '#2C2C2C' }}>
+          {title}{sorted ? ` (${sorted.length})` : ''}
+        </h2>
+        <div className="flex items-center gap-4">
+          <button onClick={() => setShow((p) => !p)} className="text-xs underline" style={{ color: '#B8860B' }}>
+            {show ? 'Hide' : 'Show'}
+          </button>
+          <button onClick={onRefresh} className="text-xs underline" style={{ color: '#B8860B' }}>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      {!show ? null : loadError ? (
+        <p className="px-6 py-6 text-sm" style={{ color: '#B00020' }}>{loadError}</p>
+      ) : sorted === null ? (
+        <p className="px-6 py-6 text-sm" style={{ color: '#2C2C2C', opacity: 0.6 }}>Loading…</p>
+      ) : sorted.length === 0 ? (
+        <p className="px-6 py-6 text-sm" style={{ color: '#1B5E20' }}>{emptyText}</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left uppercase text-xs tracking-wide" style={{ color: '#B8860B' }}>
+                <SortableHeader className="px-6 py-2" label="Guest" sortKey="name" sort={sort} onSort={toggleSort} />
+                <SortableHeader className="px-4 py-2" label="Phone" sortKey="phone" sort={sort} onSort={toggleSort} />
+                {showStatus && (
+                  <SortableHeader className="px-6 py-2" label="Status" sortKey="status" sort={sort} onSort={toggleSort} />
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {sorted.map((g) => (
+                <tr key={g.id} className="border-t" style={{ borderColor: '#f5efdc', color: '#2C2C2C' }}>
+                  <td className="px-6 py-2">{g.first_name} {g.last_name}</td>
+                  <td className="px-4 py-2" style={{ opacity: 0.75 }}>{g.phone}</td>
+                  {showStatus && (
+                    <td className="px-6 py-2">
+                      <span style={{ color: g.rsvp_status === 'no' ? '#B00020' : '#2C2C2C', opacity: g.rsvp_status === 'no' ? 1 : 0.6 }}>
+                        {g.rsvp_status === 'no' ? 'No' : 'Pending'}
+                      </span>
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
   );
 }
 

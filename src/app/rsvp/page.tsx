@@ -55,11 +55,13 @@ export default function RsvpPage() {
   const [guest, setGuest] = useState<Guest | null>(null);
   const [confirmed, setConfirmed] = useState<Status | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [consented, setConsented] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = value.trim();
     if (!trimmed) { setError('Please enter your name, email, or phone number.'); return; }
+    if (!consented) { setError('Please check the box to agree to receive SMS updates.'); return; }
 
     setLoading(true);
     setError('');
@@ -228,15 +230,24 @@ export default function RsvpPage() {
                 {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
               </div>
 
-              <p className="text-xs leading-relaxed" style={{ color: '#2C2C2C', opacity: 0.55 }}>
-                By continuing, you agree to receive SMS updates about the wedding (reminders and RSVP
-                confirmations) at the number on file. Msg &amp; data rates may apply. Reply STOP to opt out.{' '}
-                <Link href="/privacy" className="underline">Privacy Policy</Link>.
-              </p>
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={consented}
+                  onChange={(e) => { setConsented(e.target.checked); setError(''); }}
+                  className="mt-0.5 h-4 w-4 shrink-0"
+                  style={{ accentColor: '#B8860B' }}
+                />
+                <span className="text-xs leading-relaxed" style={{ color: '#2C2C2C', opacity: 0.55 }}>
+                  I agree to receive SMS updates about the wedding (reminders and RSVP
+                  confirmations) at the number on file. Msg &amp; data rates may apply. Reply STOP to opt out.{' '}
+                  <Link href="/privacy" className="underline">Privacy Policy</Link>.
+                </span>
+              </label>
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !consented}
                 className="w-full rounded-lg py-3 text-sm tracking-widest uppercase text-white transition disabled:opacity-60"
                 style={{ background: '#B8860B' }}
               >

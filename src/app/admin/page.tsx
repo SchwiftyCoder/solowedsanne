@@ -6,11 +6,7 @@ import { WEDDING_DETAILS, isThankYouAvailable, thankYouAvailableAt, defaultRemin
 type Guest = { id: string; first_name: string; last_name: string; phone: string; rsvp_status: 'pending' | 'yes' | 'no' };
 type SmsResult = { total: number; sent: number; failed: number; skipped?: number; errors: { to: string; error?: string }[] };
 type Step = 'compose' | 'preview';
-type SortKey = 'name' | 'phone' | 'status';
-
-function statusRank(s: string) {
-  return s === 'no' ? 0 : s === 'pending' ? 1 : 2;
-}
+type SortKey = 'name' | 'phone';
 
 function compareGuests(a: Guest, b: Guest, key: SortKey): number {
   switch (key) {
@@ -18,8 +14,6 @@ function compareGuests(a: Guest, b: Guest, key: SortKey): number {
       return `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`);
     case 'phone':
       return a.phone.localeCompare(b.phone);
-    case 'status':
-      return statusRank(a.rsvp_status) - statusRank(b.rsvp_status);
   }
 }
 
@@ -43,8 +37,9 @@ export default function AdminPage() {
       .catch(() => setLoadError('Could not load guest list.'));
   }
 
-  const pendingGuests = guests ? guests.filter((g) => g.rsvp_status !== 'yes') : null;
+  const pendingGuests = guests ? guests.filter((g) => g.rsvp_status === 'pending') : null;
   const confirmedGuests = guests ? guests.filter((g) => g.rsvp_status === 'yes') : null;
+  const declinedGuests = guests ? guests.filter((g) => g.rsvp_status === 'no') : null;
 
   return (
     <main className="min-h-screen px-4 py-12" style={{ background: '#FDFAF5' }}>
@@ -95,21 +90,29 @@ export default function AdminPage() {
         </div>
 
         <div className="space-y-6">
-          {/* Awaiting RSVP - shrinks as guests reply YES */}
+          {/* Awaiting RSVP - shrinks as guests reply YES or NO */}
           <RsvpTable
             title="Awaiting RSVP"
             guests={pendingGuests}
-            emptyText="Everyone has replied yes."
-            showStatus
+            emptyText="Everyone has responded."
             loadError={loadError}
             onRefresh={loadGuests}
           />
 
-          {/* Confirmed - grows as guests reply YES */}
+          {/* Confirmed attending - grows as guests reply YES */}
           <RsvpTable
             title="Confirmed Attending"
             guests={confirmedGuests}
             emptyText="No yes replies yet."
+            loadError={loadError}
+            onRefresh={loadGuests}
+          />
+
+          {/* Confirmed not attending - grows as guests reply NO */}
+          <RsvpTable
+            title="Confirmed Not Attending"
+            guests={declinedGuests}
+            emptyText="No declines yet."
             loadError={loadError}
             onRefresh={loadGuests}
           />
@@ -123,14 +126,12 @@ function RsvpTable({
   title,
   guests,
   emptyText,
-  showStatus = false,
   loadError,
   onRefresh,
 }: {
   title: string;
   guests: Guest[] | null;
   emptyText: string;
-  showStatus?: boolean;
   loadError: string;
   onRefresh: () => void;
 }) {
@@ -174,9 +175,6 @@ function RsvpTable({
               <tr className="text-left uppercase text-xs tracking-wide" style={{ color: '#B8860B' }}>
                 <SortableHeader className="px-6 py-2" label="Guest" sortKey="name" sort={sort} onSort={toggleSort} />
                 <SortableHeader className="px-4 py-2" label="Phone" sortKey="phone" sort={sort} onSort={toggleSort} />
-                {showStatus && (
-                  <SortableHeader className="px-6 py-2" label="Status" sortKey="status" sort={sort} onSort={toggleSort} />
-                )}
               </tr>
             </thead>
             <tbody>
@@ -184,13 +182,6 @@ function RsvpTable({
                 <tr key={g.id} className="border-t" style={{ borderColor: '#f5efdc', color: '#2C2C2C' }}>
                   <td className="px-6 py-2">{g.first_name} {g.last_name}</td>
                   <td className="px-4 py-2" style={{ opacity: 0.75 }}>{g.phone}</td>
-                  {showStatus && (
-                    <td className="px-6 py-2">
-                      <span style={{ color: g.rsvp_status === 'no' ? '#B00020' : '#2C2C2C', opacity: g.rsvp_status === 'no' ? 1 : 0.6 }}>
-                        {g.rsvp_status === 'no' ? 'No' : 'Pending'}
-                      </span>
-                    </td>
-                  )}
                 </tr>
               ))}
             </tbody>

@@ -40,15 +40,18 @@ export function ProgramCard() {
         <Divider star />
 
         <div className="grid sm:grid-cols-2 sm:gap-x-10 gap-y-1">
-          {/* Ceremony column */}
-          <div>
+          {/* Ceremony column - stretched to the reception column's height (it
+              has one fewer row and no heading block), then each row grows to
+              fill its even share of that height so both columns end flush
+              instead of leaving dead space under the shorter one. */}
+          <div className="flex flex-col h-full">
             {WEDDING_PROGRAM.ceremony.map((item, i) => (
-              <ProgramRow key={i} item={item} last={i === WEDDING_PROGRAM.ceremony.length - 1} />
+              <ProgramRow key={i} item={item} last={i === WEDDING_PROGRAM.ceremony.length - 1} grow />
             ))}
           </div>
 
           {/* Reception column */}
-          <div className="mt-6 sm:mt-0 pt-6 sm:pt-0 border-t sm:border-t-0" style={{ borderColor: '#e8dfc8' }}>
+          <div className="mt-6 sm:mt-0 pt-6 sm:pt-0 border-t sm:border-t-0 flex flex-col" style={{ borderColor: '#e8dfc8' }}>
             <div className="mb-4 pb-3 border-b" style={{ borderColor: GOLD }}>
               <p className="text-xs tracking-[0.25em] uppercase mb-1" style={{ color: GOLD }}>
                 {WEDDING_PROGRAM.reception.heading.time}
@@ -75,11 +78,11 @@ export function ProgramCard() {
   );
 }
 
-function ProgramRow({ item, last }: { item: ProgramItem; last: boolean }) {
+function ProgramRow({ item, last, grow }: { item: ProgramItem; last: boolean; grow?: boolean }) {
   const Icon = PROGRAM_ICONS[item.icon];
   return (
     <div
-      className={`flex items-center gap-4 py-3.5 ${last ? '' : 'border-b'}`}
+      className={`flex items-center gap-4 py-3.5 ${grow ? 'flex-1' : ''} ${last ? '' : 'border-b'}`}
       style={{ borderColor: '#f0e8d4' }}
     >
       <div

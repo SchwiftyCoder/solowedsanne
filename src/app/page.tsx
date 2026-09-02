@@ -30,16 +30,9 @@ export default function HomePage() {
         {/* Hub links */}
         <div className="rounded-2xl shadow-sm overflow-hidden border px-8 py-10 space-y-4" style={{ background: '#fff', borderColor: '#e8dfc8' }}>
           <Link
-            href="/rsvp"
+            href="/table"
             className="block w-full text-center rounded-lg py-4 text-sm tracking-widest uppercase text-white transition"
             style={{ background: '#B8860B' }}
-          >
-            Confirm Your Attendance
-          </Link>
-          <Link
-            href="/table"
-            className="block w-full text-center rounded-lg py-4 text-sm tracking-widest uppercase transition border"
-            style={{ borderColor: '#B8860B', color: '#B8860B' }}
           >
             Find Your Table
           </Link>

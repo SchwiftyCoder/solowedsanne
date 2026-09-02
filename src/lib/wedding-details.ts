@@ -28,30 +28,3 @@ export const WEDDING_PROGRAM = [
   { time: '9:00 - 11:00 PM', event: 'Celebration & Party' },
   { time: '11:00 PM', event: 'Reception Concludes' },
 ] as const;
-
-// The actual ceremony date, used to gate the thank-you send until a month after.
-export const WEDDING_DATE = new Date('2026-09-04T00:00:00');
-
-export function thankYouAvailableAt(): Date {
-  const d = new Date(WEDDING_DATE);
-  d.setMonth(d.getMonth() + 1);
-  return d;
-}
-
-export function isThankYouAvailable(): boolean {
-  return Date.now() >= thankYouAvailableAt().getTime();
-}
-
-export function defaultReminderText() {
-  return (
-    'Wedding Reminder: Solomon & Anne, Fri Sep 4, 2PM at La Maison, 33 Washington Ave, Belleville NJ. ' +
-    'Dress code: White. Reply YES or NO to RSVP! solowedsanne.com'
-  );
-}
-
-export function defaultThankYouText() {
-  return (
-    `Thank you so much for celebrating with ${WEDDING_DETAILS.coupleNames} on our wedding day - ` +
-    `it meant the world to have you there. Add your own photos here: ${WEDDING_DETAILS.photosUploadUrl}`
-  );
-}

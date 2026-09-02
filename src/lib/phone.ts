@@ -8,10 +8,3 @@ export function normalizePhone(raw: string): string {
   if (digits.length > 0) return `+${digits}`;
   return '';
 }
-
-// NANP (+1) only - covers the US (and technically Canada, which shares the
-// same country code; there's no reliable way to split them apart without an
-// area-code lookup table).
-export function isUSNumber(phone: string): boolean {
-  return phone.startsWith('+1');
-}

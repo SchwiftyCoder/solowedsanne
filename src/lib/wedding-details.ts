@@ -11,18 +11,22 @@ export const WEDDING_DETAILS = {
   photosUploadUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSe0JEBWqnBNRAnHgUZaJJE_yrwFdQpr6VuTljINK6RD8zwicg/viewform?usp=publish-editor',
 } as const;
 
-// Placeholder order of events - update times/names to match the real day-of schedule.
 export const WEDDING_PROGRAM = [
-  { time: '2:00 PM', event: 'Ceremony' },
-  { time: '3:00 PM', event: 'Cocktail Hour & Photos' },
-  { time: '4:00 PM', event: 'Grand Entrance' },
-  { time: '4:15 PM', event: 'Blessing & Prayer' },
-  { time: '4:30 PM', event: 'Dinner' },
-  { time: '5:30 PM', event: 'Toasts & Speeches' },
-  { time: '6:00 PM', event: 'Cake Cutting' },
-  { time: '6:15 PM', event: 'First Dance' },
-  { time: '6:30 PM', event: 'Dancing & Celebration' },
-  { time: '9:00 PM', event: 'Send-Off' },
+  { time: '2:00 - 2:45 PM', event: 'Family Greeting & Opening' },
+  { time: '3:00 - 3:15 PM', event: "Groom's Entrance & Presentation of Dowry" },
+  { time: '3:45 PM', event: "Bridesmaids' Entrance" },
+  { time: '4:00 PM', event: "Bride's Grand Entrance" },
+  { time: '4:15 - 4:30 PM', event: 'Acceptance of Dowry' },
+  { time: '4:45 - 5:30 PM', event: 'Officiating of Marriage' },
+  { time: '6:00 - 6:35 PM', event: 'MC Announcements & Family Photos' },
+  { time: '6:45 PM', event: 'Reception Begins & Open Bar' },
+  { time: '6:45 - 7:45 PM', event: 'Dinner Service' },
+  { time: '7:45 PM', event: 'Bride & Groom Outfit Change' },
+  { time: '8:00 PM', event: 'Second Bridal Entrance' },
+  { time: '8:15 PM', event: 'Grand Reception Entrance' },
+  { time: '8:40 PM', event: 'Family Dance' },
+  { time: '9:00 - 11:00 PM', event: 'Celebration & Party' },
+  { time: '11:00 PM', event: 'Reception Concludes' },
 ] as const;
 
 // The actual ceremony date, used to gate the thank-you send until a month after.

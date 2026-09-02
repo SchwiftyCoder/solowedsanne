@@ -34,7 +34,7 @@ export function ProgramCard() {
         <div className="space-y-3">
           {WEDDING_PROGRAM.map((item, i) => (
             <div key={i} className="flex items-start gap-4">
-              <div className="w-20 flex-shrink-0 text-right text-xs font-semibold tracking-wide" style={{ color: '#1B5E20' }}>
+              <div className="w-24 flex-shrink-0 text-right text-xs font-semibold tracking-wide" style={{ color: '#1B5E20' }}>
                 {item.time}
               </div>
               <div className="w-px self-stretch" style={{ background: '#B8860B', opacity: 0.4 }} />

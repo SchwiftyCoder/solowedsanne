@@ -6,7 +6,7 @@ export const metadata = { title: 'Wedding Program - solowedsanne' };
 export default function StandaloneProgramPage() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-4 py-12" style={{ background: '#FDFAF5' }}>
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-2xl">
         <ProgramCard />
 
         <div className="text-center mt-6">

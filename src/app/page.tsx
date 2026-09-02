@@ -1,6 +1,11 @@
 import Link from 'next/link';
 import { AmpersandEmblem, BotanicalLeaf, CalendarIcon, PinIcon } from '@/components/WeddingMotifs';
 import { CountdownTimer } from '@/components/CountdownTimer';
+import { WEDDING_DETAILS } from '@/lib/wedding-details';
+
+const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+  `${WEDDING_DETAILS.venueName}, ${WEDDING_DETAILS.venueAddress}`
+)}`;
 
 export default function HomePage() {
   return (
@@ -50,7 +55,15 @@ export default function HomePage() {
 
         <div className="flex items-center justify-center gap-4 mt-6 text-xs" style={{ color: '#2C2C2C', opacity: 0.55 }}>
           <span className="flex items-center gap-1.5"><CalendarIcon /> Friday, September 4, 2026</span>
-          <span className="flex items-center gap-1.5"><PinIcon /> La Maison, Belleville NJ</span>
+          <a
+            href={mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 underline"
+            style={{ textDecorationColor: 'rgba(44,44,44,0.35)' }}
+          >
+            <PinIcon /> La Maison, Belleville NJ
+          </a>
         </div>
 
         <div className="relative flex justify-between mt-6 px-1 pointer-events-none">

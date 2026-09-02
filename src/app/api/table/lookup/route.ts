@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, type Seating } from '@/lib/db';
 
-function normalizePhone(v: string) {
-  return v.replace(/\D/g, '');
-}
+// Letters, spaces, and common name punctuation only - no digits, no @ (this
+// endpoint only ever matches by name now, never email or phone).
+const NAME_PATTERN = /^[A-Za-z\s.'-]+$/;
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -13,28 +13,18 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'q is required' }, { status: 400 });
   }
 
+  if (!NAME_PATTERN.test(query)) {
+    return NextResponse.json({ error: 'Please enter a name using letters only.' }, { status: 400 });
+  }
+
   try {
     const sql = db();
     const guests = (await sql`
-      SELECT id, first_name, last_name, email, phone, table_number FROM seating
-    `) as Pick<Seating, 'id' | 'first_name' | 'last_name' | 'email' | 'phone' | 'table_number'>[];
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(query);
-    const queryDigits = normalizePhone(query);
-    const isPhone = !isEmail && queryDigits.length >= 7;
+      SELECT id, first_name, last_name, table_number FROM seating
+    `) as Pick<Seating, 'id' | 'first_name' | 'last_name' | 'table_number'>[];
 
-    let matches;
-    if (isEmail) {
-      const q = query.toLowerCase();
-      matches = guests.filter((g) => g.email.toLowerCase() === q);
-    } else if (isPhone) {
-      matches = guests.filter((g) => {
-        const gDigits = normalizePhone(g.phone);
-        return gDigits === queryDigits || gDigits.endsWith(queryDigits);
-      });
-    } else {
-      const q = query.toLowerCase();
-      matches = guests.filter((g) => `${g.first_name} ${g.last_name}`.toLowerCase().includes(q));
-    }
+    const q = query.toLowerCase();
+    const matches = guests.filter((g) => `${g.first_name} ${g.last_name}`.toLowerCase().includes(q));
 
     if (matches.length === 0) {
       return NextResponse.json({ found: false });

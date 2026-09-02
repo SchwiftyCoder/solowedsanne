@@ -11,6 +11,9 @@ export const WEDDING_DETAILS = {
   photosUploadUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSe0JEBWqnBNRAnHgUZaJJE_yrwFdQpr6VuTljINK6RD8zwicg/viewform?usp=publish-editor',
 } as const;
 
+// The actual ceremony date, used by the homepage countdown.
+export const WEDDING_DATE = new Date('2026-09-04T14:00:00');
+
 // Two columns, matching the printed ceremony/reception timeline sign:
 // the left column runs straight through the ceremony, the right column
 // is headed by the reception's own time range before its own events.

@@ -79,20 +79,29 @@ function ProgramRow({ item, last }: { item: ProgramItem; last: boolean }) {
   const Icon = PROGRAM_ICONS[item.icon];
   return (
     <div
-      className={`flex items-start gap-3 py-3 ${last ? '' : 'border-b'}`}
+      className={`flex items-center gap-4 py-3.5 ${last ? '' : 'border-b'}`}
       style={{ borderColor: '#f0e8d4' }}
     >
       <div
         className="flex-shrink-0 rounded-full flex items-center justify-center"
-        style={{ width: 36, height: 36, background: '#fff', border: `1px solid ${GOLD}` }}
+        style={{
+          width: 46,
+          height: 46,
+          background: 'radial-gradient(circle at 34% 28%, #FFFDF6 0%, #FBF1D9 55%, #F0DDAF 100%)',
+          border: '1px solid #D9B65C',
+          boxShadow:
+            '0 4px 7px rgba(120,88,17,0.28), 0 1px 2px rgba(120,88,17,0.2), inset 0 1.5px 1.5px rgba(255,255,255,0.95), inset 0 -2px 3px rgba(184,134,11,0.22)',
+        }}
       >
-        <Icon color={GOLD} />
+        <div style={{ filter: 'drop-shadow(0 1.5px 1px rgba(120,88,17,0.4))' }}>
+          <Icon color={GOLD} />
+        </div>
       </div>
       <div className="min-w-0">
         <p className="text-xs font-semibold tracking-wide" style={{ color: ACCENT_GREEN }}>
           {item.time}
         </p>
-        <p className="text-sm uppercase tracking-wide leading-snug" style={{ color: '#2C2C2C' }}>
+        <p className="font-serif leading-snug" style={{ fontSize: 16.5, color: '#2C2C2C', letterSpacing: 0.2 }}>
           {item.event}
         </p>
       </div>

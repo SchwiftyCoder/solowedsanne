@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { AmpersandEmblem, BotanicalLeaf, CalendarIcon, PinIcon } from '@/components/WeddingMotifs';
+import { CountdownTimer } from '@/components/CountdownTimer';
 
 export default function HomePage() {
   return (
@@ -26,6 +27,8 @@ export default function HomePage() {
             <div className="h-px w-14" style={{ background: '#B8860B', opacity: 0.35 }} />
           </div>
         </div>
+
+        <CountdownTimer />
 
         {/* Hub links */}
         <div className="rounded-2xl shadow-sm overflow-hidden border px-8 py-10 space-y-4" style={{ background: '#fff', borderColor: '#e8dfc8' }}>

@@ -1,4 +1,7 @@
-import { WEDDING_DETAILS, WEDDING_PROGRAM } from '@/lib/wedding-details';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { WEDDING_DETAILS, WEDDING_PROGRAM, getActiveProgramKey } from '@/lib/wedding-details';
 import { AmpersandEmblem, Divider } from '@/components/WeddingMotifs';
 import { PROGRAM_ICONS, type ProgramIconKey } from '@/components/ProgramIcons';
 
@@ -13,6 +16,17 @@ type ProgramItem = { time: string; event: string; icon: ProgramIconKey };
 // timeline sign: a left column running through the ceremony and a right
 // column headed by the reception's own time range.
 export function ProgramCard() {
+  // Starts null so the server-rendered markup and the client's first render
+  // match exactly - the "happening now" highlight only ever applies after
+  // mount, and only on the wedding day itself.
+  const [activeKey, setActiveKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    setActiveKey(getActiveProgramKey());
+    const interval = setInterval(() => setActiveKey(getActiveProgramKey()), 30_000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="rounded-2xl shadow-xl overflow-hidden border" style={{ borderColor: '#e0d3b0', background: '#FDFAF5' }}>
       <div className="h-1.5" style={{ background: 'linear-gradient(90deg, #B8860B, #FFD700, #B8860B)' }} />
@@ -46,7 +60,13 @@ export function ProgramCard() {
               instead of leaving dead space under the shorter one. */}
           <div className="flex flex-col h-full">
             {WEDDING_PROGRAM.ceremony.map((item, i) => (
-              <ProgramRow key={i} item={item} last={i === WEDDING_PROGRAM.ceremony.length - 1} grow />
+              <ProgramRow
+                key={i}
+                item={item}
+                last={i === WEDDING_PROGRAM.ceremony.length - 1}
+                grow
+                active={activeKey === `ceremony-${i}`}
+              />
             ))}
           </div>
 
@@ -61,7 +81,12 @@ export function ProgramCard() {
               </p>
             </div>
             {WEDDING_PROGRAM.reception.items.map((item, i) => (
-              <ProgramRow key={i} item={item} last={i === WEDDING_PROGRAM.reception.items.length - 1} />
+              <ProgramRow
+                key={i}
+                item={item}
+                last={i === WEDDING_PROGRAM.reception.items.length - 1}
+                active={activeKey === `reception-${i}`}
+              />
             ))}
           </div>
         </div>
@@ -78,20 +103,30 @@ export function ProgramCard() {
   );
 }
 
-function ProgramRow({ item, last, grow }: { item: ProgramItem; last: boolean; grow?: boolean }) {
+function ProgramRow({
+  item,
+  last,
+  grow,
+  active,
+}: {
+  item: ProgramItem;
+  last: boolean;
+  grow?: boolean;
+  active?: boolean;
+}) {
   const Icon = PROGRAM_ICONS[item.icon];
   return (
     <div
-      className={`flex items-center gap-4 py-3.5 ${grow ? 'flex-1' : ''} ${last ? '' : 'border-b'}`}
+      className={`flex items-center gap-4 py-3.5 px-2 -mx-2 rounded-xl transition-colors ${grow ? 'flex-1' : ''} ${last ? '' : 'border-b'} ${active ? 'program-row-active' : ''}`}
       style={{ borderColor: '#f0e8d4' }}
     >
       <div
-        className="flex-shrink-0 rounded-full flex items-center justify-center"
+        className={`flex-shrink-0 rounded-full flex items-center justify-center ${active ? 'program-badge-active' : ''}`}
         style={{
           width: 46,
           height: 46,
           background: 'radial-gradient(circle at 34% 28%, #FFFDF6 0%, #FBF1D9 55%, #F0DDAF 100%)',
-          border: '1px solid #D9B65C',
+          border: `1px solid ${active ? GOLD : '#D9B65C'}`,
           boxShadow:
             '0 4px 7px rgba(120,88,17,0.28), 0 1px 2px rgba(120,88,17,0.2), inset 0 1.5px 1.5px rgba(255,255,255,0.95), inset 0 -2px 3px rgba(184,134,11,0.22)',
         }}
@@ -101,8 +136,14 @@ function ProgramRow({ item, last, grow }: { item: ProgramItem; last: boolean; gr
         </div>
       </div>
       <div className="min-w-0">
-        <p className="text-xs font-semibold tracking-wide" style={{ color: ACCENT_GREEN }}>
+        <p className="text-xs font-semibold tracking-wide flex items-center gap-1.5" style={{ color: ACCENT_GREEN }}>
           {item.time}
+          {active && (
+            <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest" style={{ color: GOLD }}>
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: GOLD }} />
+              Happening Now
+            </span>
+          )}
         </p>
         <p className="font-serif leading-snug" style={{ fontSize: 16.5, color: '#2C2C2C', letterSpacing: 0.2 }}>
           {item.event}

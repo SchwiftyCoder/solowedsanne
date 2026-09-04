@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { AmpersandEmblem, BotanicalLeaf, CalendarIcon, PinIcon } from '@/components/WeddingMotifs';
+import { AmpersandEmblem, CalendarIcon, PinIcon } from '@/components/WeddingMotifs';
 import { CountdownTimer } from '@/components/CountdownTimer';
 import { WEDDING_DETAILS } from '@/lib/wedding-details';
 
@@ -66,12 +66,7 @@ export default function HomePage() {
           </a>
         </div>
 
-        <div className="relative flex justify-between mt-6 px-1 pointer-events-none">
-          <BotanicalLeaf />
-          <BotanicalLeaf flip />
-        </div>
-
-        <div className="text-center mt-4">
+        <div className="text-center mt-6">
           <Link href="/privacy" className="text-xs underline" style={{ color: '#2C2C2C', opacity: 0.4 }}>
             Privacy Policy &amp; Terms
           </Link>

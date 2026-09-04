@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { AmpersandEmblem, BotanicalLeaf } from '@/components/WeddingMotifs';
+import { AmpersandEmblem } from '@/components/WeddingMotifs';
 
 type Match = { id: string; name: string };
 
@@ -128,12 +128,7 @@ export default function TableLookupPage() {
           )}
         </div>
 
-        <div className="relative flex justify-between mt-6 px-1 pointer-events-none">
-          <BotanicalLeaf />
-          <BotanicalLeaf flip />
-        </div>
-
-        <div className="text-center mt-4">
+        <div className="text-center mt-6">
           <Link href="/" className="text-xs underline" style={{ color: '#2C2C2C', opacity: 0.4 }}>
             Back to Home
           </Link>

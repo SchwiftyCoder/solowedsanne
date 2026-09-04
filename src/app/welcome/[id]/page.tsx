@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { db, type Seating } from '@/lib/db';
 import { WEDDING_DETAILS } from '@/lib/wedding-details';
-import { AmpersandEmblem, Divider, BotanicalLeaf } from '@/components/WeddingMotifs';
+import { AmpersandEmblem, Divider } from '@/components/WeddingMotifs';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -99,11 +99,6 @@ export default async function WelcomePage({ params }: Props) {
                 </a>
               </div>
 
-              {/* Botanical leaves */}
-              <div className="relative flex justify-between mt-6 -mb-2 px-1 pointer-events-none">
-                <BotanicalLeaf />
-                <BotanicalLeaf flip />
-              </div>
           </div>
 
           <div className="h-1" style={{ background: 'linear-gradient(90deg, #B8860B, #FFD700, #B8860B)' }} />

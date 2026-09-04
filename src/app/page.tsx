@@ -49,7 +49,7 @@ export default function HomePage() {
             className="block w-full text-center rounded-lg py-4 text-sm tracking-widest uppercase text-white transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-lg hover:brightness-110"
             style={{ background: '#B8860B' }}
           >
-            Wedding Program
+            See the Program
           </Link>
         </div>
 

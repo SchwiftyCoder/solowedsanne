@@ -72,7 +72,7 @@ export default async function WelcomePage({ params }: Props) {
                   className="inline-block w-full rounded-lg py-3 text-sm tracking-widest uppercase text-white transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-lg hover:brightness-110"
                   style={{ background: '#B8860B' }}
                 >
-                  View Wedding Program
+                  See the Program
                 </Link>
               </div>
 

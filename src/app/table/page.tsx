@@ -104,7 +104,7 @@ export default function TableLookupPage() {
                   type="text"
                   value={value}
                   onChange={(e) => { setValue(e.target.value); setError(''); }}
-                  placeholder="Jane Doe, you@example.com, or +1 555 000 0000"
+                  placeholder="Kofi Mensah, you@example.com, or +1 555 000 0000"
                   disabled={loading}
                   className="w-full rounded-lg px-4 py-3 text-sm outline-none transition border"
                   style={{ borderColor: '#d6cbb0', color: '#2C2C2C' }}

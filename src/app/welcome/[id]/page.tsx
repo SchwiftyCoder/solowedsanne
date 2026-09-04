@@ -69,8 +69,8 @@ export default async function WelcomePage({ params }: Props) {
               <div className="text-center">
                 <Link
                   href={`/welcome/${id}/program`}
-                  className="inline-block w-full rounded-lg py-3 text-sm tracking-widest uppercase transition border"
-                  style={{ borderColor: '#B8860B', color: '#B8860B' }}
+                  className="inline-block w-full rounded-lg py-3 text-sm tracking-widest uppercase text-white transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-lg hover:brightness-110"
+                  style={{ background: '#B8860B' }}
                 >
                   View Wedding Program
                 </Link>
@@ -83,7 +83,7 @@ export default async function WelcomePage({ params }: Props) {
                   href={WEDDING_DETAILS.photosUploadUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block w-full rounded-lg py-3 text-sm tracking-widest uppercase text-white transition"
+                  className="inline-block w-full rounded-lg py-3 text-sm tracking-widest uppercase text-white transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-lg hover:brightness-110"
                   style={{ background: '#B8860B' }}
                 >
                   Upload Wedding Photos
@@ -92,8 +92,8 @@ export default async function WelcomePage({ params }: Props) {
                   href={WEDDING_DETAILS.photosUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block w-full rounded-lg py-3 text-sm tracking-widest uppercase transition border"
-                  style={{ borderColor: '#B8860B', color: '#B8860B' }}
+                  className="inline-block w-full rounded-lg py-3 text-sm tracking-widest uppercase text-white transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-lg hover:brightness-110"
+                  style={{ background: '#B8860B' }}
                 >
                   View Photos
                 </a>

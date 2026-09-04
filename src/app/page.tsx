@@ -39,15 +39,15 @@ export default function HomePage() {
         <div className="rounded-2xl shadow-sm overflow-hidden border px-8 py-10 space-y-4" style={{ background: '#fff', borderColor: '#e8dfc8' }}>
           <Link
             href="/table"
-            className="block w-full text-center rounded-lg py-4 text-sm tracking-widest uppercase text-white transition"
+            className="block w-full text-center rounded-lg py-4 text-sm tracking-widest uppercase text-white transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-lg hover:brightness-110"
             style={{ background: '#B8860B' }}
           >
             Find Your Table
           </Link>
           <Link
             href="/program"
-            className="block w-full text-center rounded-lg py-4 text-sm tracking-widest uppercase transition border"
-            style={{ borderColor: '#B8860B', color: '#B8860B' }}
+            className="block w-full text-center rounded-lg py-4 text-sm tracking-widest uppercase text-white transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-lg hover:brightness-110"
+            style={{ background: '#B8860B' }}
           >
             Wedding Program
           </Link>

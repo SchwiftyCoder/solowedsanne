@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, type Seating } from '@/lib/db';
 
-// Letters, spaces, and common name punctuation only - no digits, no @ (this
-// endpoint only ever matches by name now, never email or phone).
-const NAME_PATTERN = /^[A-Za-z\s.'-]+$/;
+function normalizePhoneDigits(v: string) {
+  return v.replace(/\D/g, '');
+}
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -13,18 +13,34 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'q is required' }, { status: 400 });
   }
 
-  if (!NAME_PATTERN.test(query)) {
-    return NextResponse.json({ error: 'Please enter a name using letters only.' }, { status: 400 });
-  }
-
   try {
     const sql = db();
     const guests = (await sql`
-      SELECT id, first_name, last_name, table_number FROM seating
-    `) as Pick<Seating, 'id' | 'first_name' | 'last_name' | 'table_number'>[];
+      SELECT id, first_name, last_name, email, phone, table_number FROM seating
+    `) as Pick<Seating, 'id' | 'first_name' | 'last_name' | 'email' | 'phone' | 'table_number'>[];
 
-    const q = query.toLowerCase();
-    const matches = guests.filter((g) => `${g.first_name} ${g.last_name}`.toLowerCase().includes(q));
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(query);
+    const queryDigits = normalizePhoneDigits(query);
+    const isPhone = !isEmail && queryDigits.length >= 7;
+
+    let matches;
+    if (isEmail) {
+      const q = query.toLowerCase();
+      matches = guests.filter((g) => g.email.toLowerCase() === q);
+    } else if (isPhone) {
+      matches = guests.filter((g) => {
+        const gDigits = normalizePhoneDigits(g.phone);
+        return gDigits.length > 0 && (gDigits === queryDigits || gDigits.endsWith(queryDigits) || queryDigits.endsWith(gDigits));
+      });
+    } else {
+      const q = query.toLowerCase();
+      matches = guests.filter(
+        (g) =>
+          g.first_name.toLowerCase().includes(q) ||
+          g.last_name.toLowerCase().includes(q) ||
+          `${g.first_name} ${g.last_name}`.toLowerCase().includes(q)
+      );
+    }
 
     if (matches.length === 0) {
       return NextResponse.json({ found: false });

@@ -17,7 +17,7 @@ export default function TableLookupPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = value.trim();
-    if (!trimmed) { setError('Please enter your first or last name.'); return; }
+    if (!trimmed) { setError('Please enter your name, email, or phone number.'); return; }
 
     setLoading(true);
     setError('');
@@ -38,7 +38,7 @@ export default function TableLookupPage() {
         return;
       }
 
-      setError("We couldn't find an invitation for that name. Please contact Solomon & Anne directly.");
+      setError("We couldn't find an invitation for that name, email, or phone number. Please contact Solomon & Anne directly.");
       setLoading(false);
     } catch {
       setError('Something went wrong. Please try again.');
@@ -62,7 +62,7 @@ export default function TableLookupPage() {
             Anne Agyare
           </h1>
           <p className="mt-5 text-sm leading-relaxed" style={{ color: '#2C2C2C', opacity: 0.6 }}>
-            Enter your first or last name to find<br className="hidden sm:block" /> your table.
+            Enter your name, email, or phone number to find<br className="hidden sm:block" /> your table.
           </p>
         </div>
 
@@ -97,17 +97,14 @@ export default function TableLookupPage() {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label htmlFor="contact" className="block text-xs tracking-widest uppercase mb-2" style={{ color: '#B8860B' }}>
-                  First or Last Name
+                  Name, Email, or Phone
                 </label>
                 <input
                   id="contact"
                   type="text"
                   value={value}
-                  onChange={(e) => {
-                    setValue(e.target.value.replace(/[^A-Za-z\s.'-]/g, ''));
-                    setError('');
-                  }}
-                  placeholder="Jane Doe"
+                  onChange={(e) => { setValue(e.target.value); setError(''); }}
+                  placeholder="Jane Doe, you@example.com, or +1 555 000 0000"
                   disabled={loading}
                   className="w-full rounded-lg px-4 py-3 text-sm outline-none transition border"
                   style={{ borderColor: '#d6cbb0', color: '#2C2C2C' }}
